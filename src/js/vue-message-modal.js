@@ -21,7 +21,7 @@ Vue.component('vue-modal', {
   },
   template: `
   <el-dialog
-    title="Shipping address"
+    title="LINEメッセージ配信"
     width="30%"
     :visible.sync="toggleDialog"
     :show-close="false"
