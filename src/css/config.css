@@ -1,7 +1,151 @@
-.settings-heading {
-  padding: 1em 0;
+.box{
+    float: left;
+    margin:6px;
 }
 
-.kintoneplugin-input-text {
-  width: 20em;
+.boxContainer{
+    overflow: hidden;
+    margin:12px 12px 12px 32px;
 }
+
+.input-appid>input {
+    width: 128px;
+    text-align: right;
+}
+
+#btn-getForm1 {
+    margin-top:30px;
+}
+
+.inputNum {
+    text-align:right;
+}
+
+.btn-margin {
+    margin-top:29px;
+}
+
+/*
+** チェックボックスボタン風
+*/
+.checkbtn label {
+  position: relative;
+  display: block;
+}
+.checkbtn label input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+}
+.checkbtn label input[type="checkbox"] + span {
+  width:64px;
+  height:48px;
+  text-align:center;
+  background-color: white;
+
+  display: block;
+  color: #e0e2e3;
+  border: 2px solid #e0e2e3;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  cursor: pointer;
+}
+.checkbtn label input[type="checkbox"]:checked + span {
+  background: -webkit-linear-gradient(#f7ffff, #cbe6ff);
+  color: #1e8cd7;
+  border: 2px solid #1e8cd7;
+}
+
+
+/*
+** シンプルセレクトボックス
+*/
+.simpleSel {
+	overflow: hidden;
+	width: 90%;
+	text-align: center;
+	font-size:12pt;
+}
+.simpleSel select {
+	width: 100%;
+	height:48px;
+	padding-right: 1em;
+	cursor: pointer;
+	text-indent: 0.01px;
+	text-overflow: ellipsis;
+	border: none;
+	outline: none;
+	background: transparent;
+	background-image: none;
+	box-shadow: none;
+	-webkit-appearance: none;
+	appearance: none;
+}
+.simpleSel select::-ms-expand {
+    display: none;
+}
+.simpleSel.ssel1 {
+	width:auto;
+	position: relative;
+	border: 1px solid #bbbbbb;
+	border-radius: 2px;
+	background: #ffffff;
+}
+.simpleSel.ssel1::before {
+	position: absolute;
+	top: 1.2em;
+	right: 0.9em;
+	width: 0;
+	height: 0;
+	padding: 0;
+	content: '';
+	border-left: 6px solid transparent;
+	border-right: 6px solid transparent;
+	border-top: 6px solid #666666;
+	pointer-events: none;
+}
+.simpleSel.ssel1 select {
+	padding: 8px 38px 8px 8px;
+	color: #666666;
+}
+
+/*
+** 見出し
+*/
+h3 {
+    padding: 0.5em;
+    background: aliceblue;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.23);
+}
+
+/*
+** 説明ラベル
+*/
+.ExplanationLabel {
+    margin: 12px 0;
+    padding: 0.25em 0.5em;/*上下 左右の余白*/
+    color: #494949;/*文字色*/
+    background: transparent;/*背景透明に*/
+    border-left: solid 5px #7db4e6;/*左線*/
+}
+
+/*
+** 大枠
+*/
+.topContainer {
+    padding: 1.2em;
+    margin: 2em 0;
+    color: #5d627b;
+    background: white;
+    border-top: solid 1px #e7e7e7;
+    box-shadow: 1px 3px 5px rgba(0, 0, 0, 0.22);
+}
+
+/*
+** オプション枠
+*/
+.optionContainer {
+    background-color: #f0f0f0;
+    padding: 12px;
+    border-radius: 12px;
+}
+
