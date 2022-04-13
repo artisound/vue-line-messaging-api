@@ -32,6 +32,6 @@ Vue.component('vue-modal', {
       <el-button @click="$emit('change', false)">Cancel</el-button>
       <el-button type="primary" @click="$emit('change', false)">Confirm</el-button>
     </span>
-</el-dialog>
+  </el-dialog>
   `
 })
