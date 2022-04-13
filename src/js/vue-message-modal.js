@@ -4,6 +4,8 @@ Vue.component('vue-modal', {
     event: 'change',
     radio: '未選択',
     contentsRadio: '',
+    date: '',
+    time: '',
   },
   props: ['dialog'],
   computed: {
@@ -40,6 +42,23 @@ Vue.component('vue-modal', {
     </div>
 
     <div v-if="radio != '未選択'">
+      <div v-if="radio == '予約配信(一回のみ)'">
+        <span>日時</span>
+        <el-date-picker
+          v-model="date"
+          type="date"
+          placeholder="日付を選択してください"
+        ></el-date-picker>
+        <el-time-select
+          v-model="time"
+          placeholder="時間を選択してください"
+          :picker-options="{
+            start: '00:00',
+            step: '01:00',
+            end: '23:00'
+          }"
+        ></el-time-select>
+      </div>
       <el-card>
         <div slot="header">
           <el-radio-group v-model="contentsRadio">
