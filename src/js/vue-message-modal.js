@@ -24,7 +24,8 @@ Vue.component('vue-modal', {
       '木',
       '金',
       '土'
-    ]
+    ],
+    message: '',
   },
   props: ['dialog'],
   computed: {
@@ -35,6 +36,9 @@ Vue.component('vue-modal', {
       set(newValue) {
         this.$emit('change', newValue);
       },
+    },
+    msgCount() {
+      return this.message.length;
     }
   },
   methods: {
@@ -129,6 +133,22 @@ Vue.component('vue-modal', {
             <el-button><i class="fas fa-eraser"></i></el-button>
             <el-button><i class="fas fa-times"></i></el-button>
           </div>
+        </div>
+
+        <div v-if="contentsRadio == 'テキスト'">
+          <el-input
+            type="textarea"
+            v-model="message"
+            placeholder="テキストを入力"
+          ></el-input>
+          <div class="d-flex">
+            <div>
+              <el-button>テンプレート</el-button>
+              <el-button>埋め込み文字</el-button>
+            </div>
+            <strong>{{ msgCount }}</strong><span>/500</span>
+          </div>
+
         </div>
       </el-card>
     </div>
