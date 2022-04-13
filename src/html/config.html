@@ -1,0 +1,20 @@
+<div id="vue-app">
+  <el-card shadow="always">
+    <el-alert
+      type="success"
+      title="ボタン設定"
+      :closable="false"
+    ></el-alert>
+    <el-descriptions title="User Info">
+      <el-select
+        multiple
+        v-model="config.views"
+        placeholder="Select"
+      >
+        <!-- <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+        </el-option> -->
+      </el-select>
+    </el-descriptions>
+  </el-card>
+  <button @click="save_config">保存</button>
+</div>

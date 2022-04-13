@@ -1,0 +1,21 @@
+{
+  "name": "kintone-plugin-template-minimum",
+  "version": "0.1.0",
+  "scripts": {
+    "start": "npm run develop",
+    "develop": "npm run build -- --watch",
+    "build": "kintone-plugin-packer --ppk private.ppk --out dist/plugin.zip src",
+    "deploy": "yarn build && node deploy.js",
+    "lint": "eslint src"
+  },
+  "devDependencies": {
+    "@cybozu/eslint-config": "^17.0.1",
+    "@kintone/plugin-packer": "^5.0.37",
+    "eslint": "^8.10.0"
+  },
+  "dependencies": {
+    "@kintone/plugin-uploader": "^6.0.16",
+    "dotenv": "^16.0.0",
+    "powershell": "^2.3.2"
+  }
+}
