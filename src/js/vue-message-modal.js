@@ -122,6 +122,13 @@ Vue.component('vue-modal', {
             <el-radio-button label="受信"><i class="fas fa-comment-dots"></i></el-radio-button>
             <el-radio-button label="アンケート"><i class="fas fa-clipboard"></i></el-radio-button>
           </el-radio-group>
+
+          <div class="d-flex">
+            <el-button><i class="fas fa-chevron-up"></i></el-button>
+            <el-button><i class="fas fa-chevron-down"></i></el-button>
+            <el-button><i class="fas fa-eraser"></i></el-button>
+            <el-button><i class="fas fa-times"></i></el-button>
+          </div>
         </div>
       </el-card>
     </div>
