@@ -2,7 +2,8 @@ Vue.component('vue-modal', {
   model: {
     prop: 'dialog',
     event: 'change',
-    radio: '未選択'
+    radio: '未選択',
+    contentsRadio: '',
   },
   props: ['dialog'],
   computed: {
@@ -37,6 +38,20 @@ Vue.component('vue-modal', {
       <el-radio v-model="radio" label="予約配信(繰り返し)">予約配信(繰り返し)</el-radio>
       <el-radio v-model="radio" label="今すぐ配信">今すぐ配信</el-radio>
     </div>
+
+    <el-card>
+      <div slot="header">
+        <el-radio-group v-model="contentsRadio">
+          <el-radio-button label="テキスト"><i class="far fa-comment"></i></el-radio-button>
+          <el-radio-button label="スタンプ"><i class="far fa-smile"></i></el-radio-button>
+          <el-radio-button label="画像"><i class="far fa-image"></i></el-radio-button>
+          <el-radio-button label="写真"><i class="far fa-file"></i></el-radio-button>
+          <el-radio-button label="受信"><i class="fas fa-comment-dots"></i></el-radio-button>
+          <el-radio-button label="アンケート"><i class="fas fa-clipboard"></i></el-radio-button>
+        </el-radio-group>
+      </div>
+    </el-card>
+
     <span>This is a message</span>
     <span slot="footer" class="dialog-footer">
       <el-button @click="$emit('change', false)">Cancel</el-button>
