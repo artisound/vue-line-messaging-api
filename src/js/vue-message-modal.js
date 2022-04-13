@@ -6,6 +6,25 @@ Vue.component('vue-modal', {
     contentsRadio: '',
     date: '',
     time: '',
+    daterange: '',
+    interval: 1,
+    intervalUnit: '',
+    intervalUnits: [
+      '日ごと',
+      '週ごと',
+      '月ごと',
+      '年ごと'
+    ],
+    dayOfWeek: '',
+    dayOfWeeks: [
+      '日',
+      '月',
+      '火',
+      '水',
+      '木',
+      '金',
+      '土'
+    ]
   },
   props: ['dialog'],
   computed: {
@@ -59,6 +78,40 @@ Vue.component('vue-modal', {
           }"
         ></el-time-select>
       </div>
+      <div v-else-if="radio == 予約配信(繰り返し)">
+        <span>期間</span>
+        <el-date-picker
+          v-model="daterange"
+          type="daterange"
+          range-separator="～"
+        ></el-date-picker>
+
+        <span>間隔</span>
+        <el-input-number
+          v-model="interval"
+          :min="1"
+          :max="4"
+        ></el-input-number>
+        <el-select v-model="intervalUnit">
+          <el-option
+            v-for="(unit, index) in intervalUnits"
+            :key="'unit' + index"
+            :label="unit"
+            :value="unit
+          >
+          </el-option>
+        </el-select>
+
+        <span>曜日</span>
+        <el-checkbox-group v-model="dayOfWeek">
+          <el-checkbox-button
+            v-for="(day, index) of dayOfWeeks"
+            :key="'day' + index"
+            :label="day"
+          ></el-checkbox-button>
+        </el-checkbox-group>
+      </div>
+
       <el-card>
         <div slot="header">
           <el-radio-group v-model="contentsRadio">
