@@ -38,7 +38,7 @@ Vue.component('vue-modal', {
   >
     <!-- タイミング指定 -->
     <div>
-      <span>配信区分</span>
+      <span>タイミング</span>
       <el-radio v-model="radio" label="今すぐ配信">今すぐ配信</el-radio>
     </div>
 
