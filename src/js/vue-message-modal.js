@@ -31,7 +31,7 @@ Vue.component('vue-modal', {
   template: `
   <el-dialog
     title="LINEメッセージ配信"
-    width="30%"
+    width="70%"
     :visible.sync="toggleDialog"
     :show-close="false"
     :before-close="handleClose"
