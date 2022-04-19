@@ -97,6 +97,18 @@ Vue.component('vue-modal', {
         </div>
       </template>
 
+      <template v-else-if="contentsRadio == 'ファイル'">
+        <div class="modePanel mode-FILE" style="display:none;">
+          <form class="upload-file user-icon-dnd-wrapper">
+            <input type="file" name="upFile" class="inputForm input_file" accept="text/plain,.xlsx,.docx,.pdf" />
+            <div class="preview_field"></div>
+            <div class="drop_area modal-border text-center" style="padding:22px;"><a>ファイルをアップロード</a><div style="color:#adadad"><i class="far fa-file fa-3x"></i></div></div>
+            <div class="icon_clear_button"><i class="far fa-window-close fa-2x"></i></div>
+          </form>
+          <small class="form-text text-muted small">※タイムコンシェル社にアップロードしたファイルURLを送信します<br>※ファイル保存期間は1週間</small>
+        </div>
+      </template>
+
     </el-card>
 
     <span>This is a message</span>
