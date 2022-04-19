@@ -65,6 +65,8 @@ Vue.component('vue-modal', {
         </el-button-group>
       </div>
 
+      {{ contentsRadio }}
+
       <template v-if="contentsRadio == 'テキスト'">
         <el-input
           type="textarea"
@@ -80,6 +82,18 @@ Vue.component('vue-modal', {
           <div>
             <strong>{{ msgCount }}</strong><span>/500</span>
           </div>
+        </div>
+      </template>
+
+      <template v-else-if="contentsRadio == '写真'">
+        <div class="modePanel mode-IMAGE">
+          <form class="upload-file user-icon-dnd-wrapper">
+            <input type="file" name="upFile" class="inputForm input_image" accept="image/png,image/jpeg,image/jpg" />
+            <div class="preview_field"></div>
+            <div class="drop_area modal-border text-center" style="padding:22px;"><a>写真をアップロード</a><div style="color:#adadad"><i class="far fa-image fa-3x"></i></div></div>
+            <div class="icon_clear_button"><i class="far fa-window-close fa-2x"></i></div>
+          </form>
+          <small class="form-text text-muted small">ファイル形式：JPG、JPEG、PNG<br>ファイルサイズ：10MB以下</small>
         </div>
       </template>
 
