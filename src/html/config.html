@@ -607,21 +607,18 @@
     <div>※これらの情報はプラグイン側では使用せず、本設定画面保存時にサーバー側にカテゴリ構成ファイルとして保存されます</div>
     <div id="setCategoryIcons"></div>
   </div>
-</div>
 
-
-
-
-
-<div class="block" style="display:flex;">
-  <button
-    @click="history.back()"
-    class="kuc-btn normal"
-    style="margin:12px;"
-  >キャンセル</button>
-  <button
-    @click="save_config"
-    class="kuc-btn submit"
-    style="margin:12px;"
-  >保存</button>
+  
+  <div class="block" style="display:flex;">
+    <button
+      @click="history.back()"
+      class="kuc-btn normal"
+      style="margin:12px;"
+    >キャンセル</button>
+    <button
+      @click="save_config"
+      class="kuc-btn submit"
+      style="margin:12px;"
+    >保存</button>
+  </div>
 </div>

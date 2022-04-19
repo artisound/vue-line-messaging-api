@@ -1,0 +1,15 @@
+.el-dialog__body {
+    padding-top: 0;
+}
+
+.el-card__header {
+    padding: 8px 20px;
+}
+
+.d-flex {
+    display: flex;
+}
+
+.justify-content-between {
+    justify-content: space-between;
+}

@@ -21,6 +21,7 @@
     ],
     "css": [
       "https://unpkg.com/element-ui/lib/theme-chalk/index.css",
+      "https://use.fontawesome.com/releases/v5.6.1/css/all.css",
       "css/51-modern-default.css",
       "css/desktop.css"
     ]
@@ -49,9 +50,6 @@
       "css/51-modern-default.css",
       "css/kintone-ui-component.min.css",
       "css/config.css"
-    ],
-    "required_params": [
-      "message"
     ]
   }
 }
