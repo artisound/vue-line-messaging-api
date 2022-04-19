@@ -3,7 +3,7 @@ Vue.component('vue-modal', {
     prop: 'dialog',
     event: 'change',
   },
-  props: ['dialog'],
+  props: ['dialog', 'config'],
   data() {
     return {
       radio: '今すぐ配信',
@@ -23,6 +23,9 @@ Vue.component('vue-modal', {
     msgCount() {
       return this.message.length;
     }
+  },
+  mounted() {
+    console.log(this.config);
   },
   methods: {
     handleClose() {
