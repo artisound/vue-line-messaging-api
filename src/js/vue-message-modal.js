@@ -65,7 +65,7 @@ Vue.component('vue-modal', {
         </el-button-group>
       </div>
 
-      <div v-if="contentsRadio == 'テキスト'">
+      <template v-if="contentsRadio == 'テキスト'">
         <el-input
           type="textarea"
           v-model="message"
@@ -81,8 +81,8 @@ Vue.component('vue-modal', {
             <strong>{{ msgCount }}</strong><span>/500</span>
           </div>
         </div>
+      </template>
 
-      </div>
     </el-card>
 
     <span>This is a message</span>
