@@ -87,8 +87,8 @@ Vue.component('vue-modal', {
 
     <span>This is a message</span>
     <span slot="footer" class="dialog-footer">
-      <el-button @click="$emit('change', false)">Cancel</el-button>
-      <el-button type="primary" @click="$emit('change', false)">Confirm</el-button>
+      <el-button @click="$emit('change', false)">キャンセル</el-button>
+      <el-button type="primary" @click="$emit('change', false)">確認</el-button>
     </span>
   </el-dialog>
   `
