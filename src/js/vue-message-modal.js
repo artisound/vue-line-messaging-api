@@ -65,8 +65,6 @@ Vue.component('vue-modal', {
         </el-button-group>
       </div>
 
-      {{ contentsRadio }}
-
       <template v-if="contentsRadio == 'テキスト'">
         <el-input
           type="textarea"
