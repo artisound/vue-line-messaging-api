@@ -5,7 +5,7 @@
   kintone.events.on('app.record.index.show', function() {
     const spaceElement = kintone.app.getHeaderMenuSpaceElement();
     spaceElement.id = 'vue-app';
-    spaceElement.innerHTML = '<el-button type="primary" @click="toggleDialog">open a Form nested Dialog</el-button>';
+    spaceElement.innerHTML = '<el-button type="primary" @click="toggleDialog">LINEメッセージ</el-button>';
     spaceElement.innerHTML += '<vue-modal v-model="dialog" ></vue-modal>';
 
     console.log(window);
