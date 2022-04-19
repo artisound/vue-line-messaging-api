@@ -72,12 +72,14 @@ Vue.component('vue-modal', {
           placeholder="テキストを入力"
           :rows="10"
         ></el-input>
-        <div class="d-flex">
+        <div class="d-flex justify-content-between">
           <div>
             <el-button v-if="config.msg_option.template">テンプレート</el-button>
             <el-button v-if="config.msg_option.embed_char">埋め込み文字</el-button>
           </div>
-          <strong>{{ msgCount }}</strong><span>/500</span>
+          <div>
+            <strong>{{ msgCount }}</strong><span>/500</span>
+          </div>
         </div>
 
       </div>
