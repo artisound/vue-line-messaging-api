@@ -1,6 +1,7 @@
 Vue.component('vue-modal', {
   model: {
     prop: 'dialog',
+    event: 'change',
   },
   props: ['dialog'],
   data() {
