@@ -1,58 +1,66 @@
 .box{
-    float: left;
-    margin:6px;
+  float: left;
+  margin:6px;
 }
 
 .boxContainer{
-    overflow: hidden;
-    margin:12px 12px 12px 32px;
+  overflow: hidden;
+  margin:12px 12px 12px 32px;
 }
 
 .input-appid>input {
-    width: 128px;
-    text-align: right;
+  width: 128px;
+  text-align: right;
 }
 
 #btn-getForm1 {
-    margin-top:30px;
+  margin-top:30px;
 }
 
 .inputNum {
-    text-align:right;
+  text-align:right;
 }
 
 .btn-margin {
-    margin-top:29px;
+  margin-top:29px;
 }
 
 /*
 ** チェックボックスボタン風
 */
-.checkbtn label {
-  position: relative;
+.checkbtn>label {
   display: block;
-}
-.checkbtn label input[type="checkbox"] {
-  position: absolute;
-  opacity: 0;
-}
-.checkbtn label input[type="checkbox"] + span {
-  width:64px;
-  height:48px;
-  text-align:center;
-  background-color: white;
-
-  display: block;
-  color: #e0e2e3;
-  border: 2px solid #e0e2e3;
-  border-radius: 0.5rem;
-  padding: 0.5rem;
+  width: 80px;
   cursor: pointer;
 }
-.checkbtn label input[type="checkbox"]:checked + span {
+
+.checkbtn>label input[type="checkbox"] {
+  display: none;
+}
+
+.checkbtn>label input[type="checkbox"] + span {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px;
+  border: 2px solid #e0e2e3;
+  background-color: white;
+  color: #e0e2e3;
+  border-radius: 0.5rem;
+  padding: .8rem .5rem;
+  cursor: pointer;
+}
+
+.checkbtn>label input[type="checkbox"]:checked + span {
   background: -webkit-linear-gradient(#f7ffff, #cbe6ff);
   color: #1e8cd7;
   border: 2px solid #1e8cd7;
+}
+
+.checkbtn>label>span>i + span {
+  display: block;
+  width: 100%;
+  text-align: center;
 }
 
 
