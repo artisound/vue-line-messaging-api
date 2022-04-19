@@ -77,8 +77,13 @@
     },
     mounted: async function() {
       const config = kintone.plugin.app.getConfig(PLUGIN_ID);
-      for (var c in config ) {
-        this.config[c] = config[c];
+      if(config.data) {
+        console.log(config);
+        const json = this.parse(config.data);
+        console.log(json);
+        if (Object.keys(json).length) this.config = json;
+
+        console.log(this.config);
       }
 
 
@@ -101,8 +106,19 @@
       console.log(this.spaces)
     },
     methods: {
+      parse(json) {
+        try {
+          return JSON.parse(json);
+        } catch {
+          console.log('catch');
+          return {};
+        }
+      },
       save_config() {
-        kintone.plugin.app.setConfig(this.config)
+        console.log(this.config);
+        const config = JSON.stringify(this.config);
+        console.log(config);
+        kintone.plugin.app.setConfig({ data: config });
       },
 
       /** ********************************************************************
