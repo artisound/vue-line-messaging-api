@@ -44,7 +44,7 @@ Vue.component('vue-modal', {
     </div>
 
     <el-card>
-      <div slot="header">
+      <div class="d-flex justify-content-between" slot="header">
         <el-radio-group v-model="contentsRadio">
           <el-radio-button label="テキスト"><i class="far fa-comment"></i></el-radio-button>
           <el-radio-button label="スタンプ"><i class="far fa-smile"></i></el-radio-button>
