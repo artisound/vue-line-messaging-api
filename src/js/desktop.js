@@ -1,21 +1,7 @@
 (function(PLUGIN_ID) {
-  const config = kintone.plugin.app.getConfig(PLUGIN_ID)
-  let data = {};
-  if (config.data) {
-    const json = parse(config.data);
-    if (Object.keys(json).length) data = json;
-  }
-
-  function parse(json) {
-    try {
-      return JSON.parse(json);
-    } catch {
-      console.log('catch');
-      return {};
-    }
-  }
-
   'use strict';
+  const config = kintone.plugin.app.getConfig(PLUGIN_ID)
+  const data = (config.data && Object.keys( parse(config.data) ).length) ? parse(config.data) : {};
 
   kintone.events.on('app.record.index.show', function() {
     const spaceElement = kintone.app.getHeaderMenuSpaceElement();
@@ -45,3 +31,12 @@
   });
 
 })(kintone.$PLUGIN_ID);
+
+function parse(json) {
+  try {
+    return JSON.parse(json);
+  } catch {
+    console.log('catch');
+    return {};
+  }
+}

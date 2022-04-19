@@ -8,39 +8,15 @@ Vue.component('vue-modal', {
     return {
       radio: '今すぐ配信',
       contentsRadio: '',
-      message: '',
+      message: [],
       isReply: false,
       objContents: [
-        {
-          label: 'テキスト',
-          value: 'TEXT',
-          icon: 'far fa-comment'
-        },
-        {
-          label: 'スタンプ',
-          value: 'STICKER',
-          icon: 'far fa-smile'
-        },
-        {
-          label: '写真',
-          value: 'IMAGE',
-          icon: 'far fa-image'
-        },
-        {
-          label: 'ファイル',
-          value: 'FILE',
-          icon: 'far fa-file'
-        },
-        {
-          label: 'リッチメッセージ',
-          value: 'RICHTEXT',
-          icon: 'fas fa-comment-dots'
-        },
-        {
-          label: '受信Box',
-          value: 'INFORMATION',
-          icon: 'fas fa-clipboard'
-        }
+        { label: 'テキスト',          value: 'TEXT',         icon: 'far fa-comment' },
+        { label: 'スタンプ',          value: 'STICKER',      icon: 'far fa-smile' },
+        { label: '写真',              value: 'IMAGE',        icon: 'far fa-image' },
+        { label: 'ファイル',          value: 'FILE',         icon: 'far fa-file' },
+        { label: 'リッチテキスト',    value: 'RICHTEXT',     icon: 'fas fa-comment-dots' },
+        { label: '受信Box',           value: 'INFORMATION',  icon: 'fas fa-clipboard' },
       ]
     }
   },
@@ -58,11 +34,41 @@ Vue.component('vue-modal', {
     }
   },
   mounted() {
-    console.log(this.config);
+    const config = this.config;
+    console.log(config);
+
+    if(config.msg_sect.length) {
+
+    }
   },
   methods: {
     handleClose() {
       return;
+    },
+
+    objMsgType(sect) {
+      const obj = { sect: sect };
+      switch(sect) {
+        case 'TEXT':
+          obj['format'] = { type: 'text', text: '' };
+          break;
+        case 'STICKER':
+          obj['format'] = { type: 'sticker', packageId: '', stickerId: '' };
+          break;
+        case 'IMAGE':
+          obj['format'] = { type: 'image', originalContentUrl: '', previewImageUrl: '' };
+          break;
+        case 'FILE':
+          obj['url'] = '';
+          break;
+        case 'RICHTEXT':
+          obj['contents'] = '';
+          break;
+        case 'INFORMATION':
+          // obj['format'] = {};
+          break;
+      }
+
     }
   },
   template: `
@@ -85,14 +91,15 @@ Vue.component('vue-modal', {
           <el-tooltip
             v-for="obj in objContents"
             :content="obj.label"
-            placement="bottom"
+            placement="top"
           >
             <el-radio-button v-if="config.msg_sect.find(v => v == obj.value)" :label="obj.label"><i :class="obj.icon"></i></el-radio-button>
           </el-tooltip>
         </el-radio-group>
 
         <el-button-group>
-          <el-button><i class="fas fa-chevron-up"></i></el-button>
+          <el-button
+          ><i class="fas fa-chevron-up"></i></el-button>
           <el-button><i class="fas fa-chevron-down"></i></el-button>
           <el-button><i class="fas fa-eraser"></i></el-button>
           <el-button><i class="fas fa-times"></i></el-button>

@@ -15,7 +15,7 @@
           btn_spaceId: '',                // ボタン名
 
           // ● LINEメッセージ送信機能
-          msg_sect: [],   // 送信メッセージ種別
+          msg_sect: ['TEXT'],   // 送信メッセージ種別
           msg_max : 1,    // 一度のメッセージ数上限
           msg_option: {   // 使用するテキストオプション
             template  : false,
@@ -78,12 +78,8 @@
     mounted: async function() {
       const config = kintone.plugin.app.getConfig(PLUGIN_ID);
       if(config.data) {
-        console.log(config);
         const json = this.parse(config.data);
-        console.log(json);
         if (Object.keys(json).length) this.config = json;
-
-        console.log(this.config);
       }
 
 
@@ -106,21 +102,20 @@
       console.log(this.spaces)
     },
     methods: {
-      parse(json) {
-        try {
-          return JSON.parse(json);
-        } catch {
-          console.log('catch');
-          return {};
-        }
-      },
+      // ================================================================================================================================
+      // ボタンアクション
+      // ================================================================================================================================
+      /** ********************************************************************
+       * 設定保存
+       ******************************************************************** */
       save_config() {
-        console.log(this.config);
         const config = JSON.stringify(this.config);
-        console.log(config);
         kintone.plugin.app.setConfig({ data: config });
       },
 
+      // ================================================================================================================================
+      // データ取得
+      // ================================================================================================================================
       /** ********************************************************************
        * アプリのフィールド情報を取得
        * @param {Number} appId - 取得するフィールドのアプリID
@@ -138,7 +133,6 @@
           console.error(err);
           return [];
         });
-        console.log(fields);
 
         if (targetProp) {
           this[targetProp] = fields
@@ -190,7 +184,21 @@
         } else {
           return spaces
         }
-      }
-    }
+      },
+
+
+      // ================================================================================================================================
+      // その他の関数
+      // ================================================================================================================================
+      parse(json) {
+        try {
+          return JSON.parse(json);
+        } catch {
+          console.log('catch');
+          return {};
+        }
+      },
+    },
+
   })
 })(kintone.$PLUGIN_ID);
