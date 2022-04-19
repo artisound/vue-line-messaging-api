@@ -9,6 +9,38 @@ Vue.component('vue-modal', {
       radio: '今すぐ配信',
       contentsRadio: '',
       message: '',
+      objContents: [
+        {
+          label: 'テキスト',
+          value: 'TEXT',
+          icon: 'far fa-comment'
+        },
+        {
+          label: 'スタンプ',
+          value: 'STICKER',
+          icon: 'far fa-smile'
+        },
+        {
+          label: '写真',
+          value: 'IMAGE',
+          icon: 'far fa-image'
+        },
+        {
+          label: 'ファイル',
+          value: 'FILE',
+          icon: 'far fa-file'
+        },
+        {
+          label: 'リッチメッセージ',
+          value: 'RICHTEXT',
+          icon: 'fas fa-comment-dots'
+        },
+        {
+          label: '受信Box',
+          value: 'INFORMATION',
+          icon: 'fas fa-clipboard'
+        }
+      ]
     }
   },
   computed: {
@@ -49,12 +81,13 @@ Vue.component('vue-modal', {
     <el-card>
       <div class="d-flex justify-content-between" slot="header">
         <el-radio-group v-model="contentsRadio">
-          <el-radio-button v-if="config.msg_sect.find(v => v == 'TEXT')" label="テキスト"><i class="far fa-comment"></i></el-radio-button>
-          <el-radio-button v-if="config.msg_sect.find(v => v == 'STICKER')" label="スタンプ"><i class="far fa-smile"></i></el-radio-button>
-          <el-radio-button v-if="config.msg_sect.find(v => v == 'IMAGE')" label="写真"><i class="far fa-image"></i></el-radio-button>
-          <el-radio-button v-if="config.msg_sect.find(v => v == 'FILE')" label="ファイル"><i class="far fa-file"></i></el-radio-button>
-          <el-radio-button v-if="config.msg_sect.find(v => v == 'RICHTEXT')" label="リッチメッセージ"><i class="fas fa-comment-dots"></i></el-radio-button>
-          <el-radio-button v-if="config.msg_sect.find(v => v == 'INFORMATION')" label="受信Box"><i class="fas fa-clipboard"></i></el-radio-button>
+          <el-tooltip
+            v-for="obj in objContents"
+            :content="obj.label"
+            placement="bottom"
+          >
+            <el-radio-button v-if="config.msg_sect.find(v => v == obj.value)" :label="obj.label"><i :class="obj.icon"></i></el-radio-button>
+          </el-tooltip>
         </el-radio-group>
 
         <el-button-group>
