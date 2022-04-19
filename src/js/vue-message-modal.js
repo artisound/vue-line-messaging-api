@@ -49,12 +49,12 @@ Vue.component('vue-modal', {
     <el-card>
       <div class="d-flex justify-content-between" slot="header">
         <el-radio-group v-model="contentsRadio">
-          <el-radio-button label="テキスト"><i class="far fa-comment"></i></el-radio-button>
-          <el-radio-button label="スタンプ"><i class="far fa-smile"></i></el-radio-button>
-          <el-radio-button label="画像"><i class="far fa-image"></i></el-radio-button>
-          <el-radio-button label="写真"><i class="far fa-file"></i></el-radio-button>
-          <el-radio-button label="受信"><i class="fas fa-comment-dots"></i></el-radio-button>
-          <el-radio-button label="アンケート"><i class="fas fa-clipboard"></i></el-radio-button>
+          <el-radio-button v-if="config.msg_sect.find(v => v == 'TEXT')" label="テキスト"><i class="far fa-comment"></i></el-radio-button>
+          <el-radio-button v-if="config.msg_sect.find(v => v == 'STICKER')" label="スタンプ"><i class="far fa-smile"></i></el-radio-button>
+          <el-radio-button v-if="config.msg_sect.find(v => v == 'IMAGE')" label="写真"><i class="far fa-file"></i></el-radio-button>
+          <el-radio-button v-if="config.msg_sect.find(v => v == 'FILE')" label="ファイル"><i class="far fa-image"></i></el-radio-button>
+          <el-radio-button v-if="config.msg_sect.find(v => v == 'RICHTEXT')" label="リッチメッセージ"><i class="fas fa-comment-dots"></i></el-radio-button>
+          <el-radio-button v-if="config.msg_sect.find(v => v == 'INFORMATION')" label="受信Box"><i class="fas fa-clipboard"></i></el-radio-button>
         </el-radio-group>
 
         <el-button-group>
@@ -74,8 +74,8 @@ Vue.component('vue-modal', {
         ></el-input>
         <div class="d-flex">
           <div>
-            <el-button>テンプレート</el-button>
-            <el-button>埋め込み文字</el-button>
+            <el-button v-if="config.msg_option.template">テンプレート</el-button>
+            <el-button v-if="config.msg_option.embed_char">埋め込み文字</el-button>
           </div>
           <strong>{{ msgCount }}</strong><span>/500</span>
         </div>
