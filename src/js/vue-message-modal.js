@@ -98,7 +98,7 @@ Vue.component('vue-modal', {
       </template>
 
       <template v-else-if="contentsRadio == 'ファイル'">
-        <div class="modePanel mode-FILE" style="display:none;">
+        <div class="modePanel mode-FILE"">
           <form class="upload-file user-icon-dnd-wrapper">
             <input type="file" name="upFile" class="inputForm input_file" accept="text/plain,.xlsx,.docx,.pdf" />
             <div class="preview_field"></div>
