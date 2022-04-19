@@ -70,6 +70,7 @@ Vue.component('vue-modal', {
           type="textarea"
           v-model="message"
           placeholder="テキストを入力"
+          :rows="10"
         ></el-input>
         <div class="d-flex">
           <div>
