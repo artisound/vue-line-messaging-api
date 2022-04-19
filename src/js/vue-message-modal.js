@@ -9,6 +9,7 @@ Vue.component('vue-modal', {
       radio: '今すぐ配信',
       contentsRadio: '',
       message: '',
+      isReply: false,
       objContents: [
         {
           label: 'テキスト',
@@ -109,6 +110,7 @@ Vue.component('vue-modal', {
           <div>
             <el-button v-if="config.msg_option.template">テンプレート</el-button>
             <el-button v-if="config.msg_option.embed_char">埋め込み文字</el-button>
+            <el-checkbox v-if="config.msg_reply" v-model="isReply">返信を受け付けする</el-checkbox>
           </div>
           <div>
             <strong>{{ msgCount }}</strong><span>/500</span>
