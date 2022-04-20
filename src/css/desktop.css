@@ -38,3 +38,7 @@
     background-color: rgba(0,0,0,0.03);
     padding: 0.5rem 1.25rem;
 }
+
+.el-checkbox__label {
+    padding-left: 2px;
+}
