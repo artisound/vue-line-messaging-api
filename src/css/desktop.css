@@ -19,3 +19,9 @@
     width: 70%;
     border-radius: 2%;
 }
+
+.el-dialog__header {
+    background-color: #0075ff;
+    border-radius: 2% 2% 0 0;
+    padding: 7px 20px;
+}
