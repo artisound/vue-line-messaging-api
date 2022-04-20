@@ -16,6 +16,7 @@
       "https://unpkg.com/@kintone/rest-api-client@latest/umd/KintoneRestAPIClient.min.js",
       "https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js",
       "https://unpkg.com/element-ui/lib/index.js",
+      "js/stickers.js",
       "js/vue-message-modal.js",
       "js/desktop.js"
     ],
@@ -43,7 +44,6 @@
       "https://unpkg.com/element-ui/lib/index.js",
       "https://cdn.jsdelivr.net/npm/quill@1/dist/quill.min.js",
       "https://cdn.jsdelivr.net/npm/vue-quill-editor@3.0.6/dist/vue-quill-editor.js",
-      "js/stickers.js",
       "js/config.js"
     ],
     "css": [

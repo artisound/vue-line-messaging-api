@@ -9,7 +9,7 @@ Vue.component('vue-modal', {
       radio: '今すぐ配信',
       contentsRadio: '',
       messages: [],
-      stickers: stickers(),
+      stickers: [],
       isReply: false,
       objContents: [
         { label: 'テキスト',          value: 'TEXT',         icon: 'far fa-comment' },
@@ -36,7 +36,7 @@ Vue.component('vue-modal', {
   },
   mounted() {
     const config = this.config;
-    console.log(this.stickers);
+    console.log(stickers());
 
     if(config.msg_sect.length) {
       const primary_sect = config.msg_sect[0];
