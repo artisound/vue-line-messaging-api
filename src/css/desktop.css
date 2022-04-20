@@ -29,3 +29,7 @@
 .el-dialog__title {
     color: #fff;
 }
+
+.el-card__header {
+    padding: 0;
+}
