@@ -43,6 +43,7 @@
       "https://unpkg.com/element-ui/lib/index.js",
       "https://cdn.jsdelivr.net/npm/quill@1/dist/quill.min.js",
       "https://cdn.jsdelivr.net/npm/vue-quill-editor@3.0.6/dist/vue-quill-editor.js",
+      "js/stickers.js",
       "js/config.js"
     ],
     "css": [
