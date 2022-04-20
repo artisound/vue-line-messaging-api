@@ -8,7 +8,8 @@ Vue.component('vue-modal', {
     return {
       radio: '今すぐ配信',
       contentsRadio: '',
-      message: [],
+      messages: [],
+      stickers: stickers(),
       isReply: false,
       objContents: [
         { label: 'テキスト',          value: 'TEXT',         icon: 'far fa-comment' },
@@ -35,10 +36,11 @@ Vue.component('vue-modal', {
   },
   mounted() {
     const config = this.config;
-    console.log(config);
+    console.log(this.stickers);
 
     if(config.msg_sect.length) {
-
+      const primary_sect = config.msg_sect[0];
+      this.messages.push(this.objMsgType(primary_sect));
     }
   },
   methods: {
@@ -68,7 +70,14 @@ Vue.component('vue-modal', {
           // obj['format'] = {};
           break;
       }
-
+      return obj;
+    },
+    changeMsgType(sect, i) {
+      console.log(sect);
+      const msgType = this.objMsgType(sect);
+      console.log(i);
+      console.log(msgType);
+      this.$set(this.messages, i, msgType);
     }
   },
   template: `
@@ -81,36 +90,52 @@ Vue.component('vue-modal', {
   >
     <!-- タイミング指定 -->
     <div>
-      <span>タイミング</span>
+      <div>タイミング</div>
       <el-radio v-model="radio" label="今すぐ配信">今すぐ配信</el-radio>
     </div>
 
-    <el-card>
+    <el-card v-for="(msg, i) in messages" :key="i">
       <div class="d-flex justify-content-between" slot="header">
-        <el-radio-group v-model="contentsRadio">
+        <el-radio-group v-model="msg.sect">
           <el-tooltip
             v-for="obj in objContents"
-            :content="obj.label"
             placement="top"
+            :content="obj.label"
           >
-            <el-radio-button v-if="config.msg_sect.find(v => v == obj.value)" :label="obj.label"><i :class="obj.icon"></i></el-radio-button>
+            <el-radio-button
+              v-if="config.msg_sect.includes(obj.value)"
+              :label="obj.value"
+            >
+              <i :class="obj.icon"></i>
+            </el-radio-button>
           </el-tooltip>
         </el-radio-group>
 
         <el-button-group>
           <el-button
+            :disabled="i == 0 ? true : false"
+            @click=""
           ><i class="fas fa-chevron-up"></i></el-button>
-          <el-button><i class="fas fa-chevron-down"></i></el-button>
-          <el-button><i class="fas fa-eraser"></i></el-button>
-          <el-button><i class="fas fa-times"></i></el-button>
+          <el-button
+            :disabled="messages.length == 1 && i == messages.length - 1 ? true : false"
+            @click=""
+          ><i class="fas fa-chevron-down"></i></el-button>
+          <el-button
+            @click=""
+          ><i class="fas fa-eraser"></i></el-button>
+          <el-button
+            :disabled="messages.length == 1 ? true : false"
+            @click=""
+          ><i class="fas fa-times"></i></el-button>
         </el-button-group>
       </div>
 
-      <template v-if="contentsRadio == 'テキスト'">
+      <template v-if="msg.sect == 'TEXT'">
         <el-input
           type="textarea"
-          v-model="message"
+          v-model="msg.format.text"
           placeholder="テキストを入力"
+          :maxlength="500"
           :rows="10"
         ></el-input>
         <div class="d-flex justify-content-between">
@@ -119,13 +144,10 @@ Vue.component('vue-modal', {
             <el-button v-if="config.msg_option.embed_char">埋め込み文字</el-button>
             <el-checkbox v-if="config.msg_reply" v-model="isReply">返信を受け付けする</el-checkbox>
           </div>
-          <div>
-            <strong>{{ msgCount }}</strong><span>/500</span>
-          </div>
         </div>
       </template>
 
-      <template v-else-if="contentsRadio == '写真'">
+      <template v-else-if="msg.sect == 'IMAGE'">
         <div class="modePanel mode-IMAGE">
           <form class="upload-file user-icon-dnd-wrapper">
             <input type="file" name="upFile" class="inputForm input_image" accept="image/png,image/jpeg,image/jpg" />
@@ -137,8 +159,8 @@ Vue.component('vue-modal', {
         </div>
       </template>
 
-      <template v-else-if="contentsRadio == 'ファイル'">
-        <div class="modePanel mode-FILE"">
+      <template v-else-if="msg.sect == 'FILE'">
+        <div class="modePanel mode-FILE">
           <form class="upload-file user-icon-dnd-wrapper">
             <input type="file" name="upFile" class="inputForm input_file" accept="text/plain,.xlsx,.docx,.pdf" />
             <div class="preview_field"></div>
@@ -147,6 +169,17 @@ Vue.component('vue-modal', {
           </form>
           <small class="form-text text-muted small">※タイムコンシェル社にアップロードしたファイルURLを送信します<br>※ファイル保存期間は1週間</small>
         </div>
+      </template>
+
+      <template v-else-if="msg.sect == 'RICHTEXT'">
+        <quill-editor
+          v-model="msg.contents"
+          ref="quillEditor"
+          :options="{
+              theme: 'snow'
+            }
+          "
+        ></vue-quill-editor>
       </template>
 
     </el-card>

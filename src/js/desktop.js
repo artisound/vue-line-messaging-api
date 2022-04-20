@@ -13,7 +13,8 @@
     new Vue({
       el: '#vue-app',
       components: [
-        'vue-modal'
+        'vue-modal',
+        'quill-editor'
       ],
       data() {
         return {
