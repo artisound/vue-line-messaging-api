@@ -58,7 +58,9 @@ Vue.component('vue-modal', {
           obj['format'] = { type: 'sticker', packageId: '', stickerId: '' };
           break;
         case 'IMAGE':
-          obj['format'] = { type: 'image', originalContentUrl: '', previewImageUrl: '' };
+          obj['format']    = { type: 'image', originalContentUrl: '', previewImageUrl: '' };
+          obj['dialog']    = false;
+          obj['path'] = '';
           break;
         case 'FILE':
           obj['url'] = '';
@@ -84,6 +86,10 @@ Vue.component('vue-modal', {
     },
     changeSelectFile(file) {
       console.log(file)
+    },
+    async delete_file(sect, i) {
+      const msgType = this.objMsgType(sect);
+      this.$set(this.messages, i, msgType);
     }
   },
   template: `
@@ -167,6 +173,10 @@ Vue.component('vue-modal', {
             :key="name"
             :label="name"
             :name="name"
+            :style="{
+              maxHeight: '300px',
+              overflowY: 'auto',
+            }"
           >
             <div
               :class="[
@@ -182,6 +192,7 @@ Vue.component('vue-modal', {
                 :key="stickerId"
                 :class="[
                   'col-6',
+                  'col-lg-1',
                   'col-md-2',
                   'col-sm-4',
                   'd-flex',
@@ -215,23 +226,70 @@ Vue.component('vue-modal', {
 
       <template v-else-if="msg.sect == 'IMAGE'">
         <el-upload
+          v-if="!msg.format.previewImageUrl"
           drag
           action="https://timeconcier.jp/forline/tccom/v2/tcLibFileUpload/"
           accept="image/jpeg,image/png"
-          class="w-100"
+          limit="1"
+          :show-file-list="false"
+          :on-preview="msg.format.previewImageUrl"
           :multiple="false"
-          :on-change="(file) => {
-            console.log(i)
-            console.log(file)
-            const reader = new FileReader()
-            reader.readAsDataURL(file.raw)
-            return reader.result
+          :http-request="async (data) => {
+            const async_url = 'https://timeconcier.jp/forline/tccom/v2/tcLibFileUpload/';
+            const fd        = new FormData();
+            fd.append('file', data.file);
+
+            const uploaded_file = await axios.post(async_url, fd, {
+              headers: { 'Content-Type': 'multipart/form-data' },
+            }).then(resp => {
+              return resp.status == 200 ? resp.data : resp;
+            }).catch(err => {
+              console.error(err)
+            });
+            console.log(uploaded_file)
+            if(uploaded_file.url) {
+              $set(messages[i].format, 'originalContentUrl', uploaded_file.url);
+              $set(messages[i].format, 'previewImageUrl', uploaded_file.url);
+              $set(messages[i], 'path', uploaded_file.path + uploaded_file.name);
+            }
           }"
         >
           <i class="el-icon-upload"></i>
-          <div class="el-upload__text">ドラッグまたは<em>クリック</em>で写真をアップロード</div>
-          <div class="el-upload__tip" slot="tip">jpg/png files with a size less than 500kb</div>
+          <div class="el-upload__text">ドラッグまたは<em>クリック</em>でアップロード</div>
+          <div class="el-upload__tip d-flex flex-column" slot="tip">
+            <small style="line-height:initial;">※タイムコンシェル社にアップロードしたファイルURLを送信します。</small>
+            <small style="line-height:initial;">※ファイル保存期間は1週間です。</small>
+          </div>
         </el-upload>
+        <div
+          v-else
+          :class="[
+            'd-flex',
+            'justify-content-center',
+          ]"
+        >
+          <div class="position-relative">
+            <img
+              :src="msg.format.previewImageUrl"
+              :style="{
+                maxWidth: '200px',
+                display: 'block',
+              }"
+            >
+            <el-button
+              circle
+              type="danger"
+              icon="el-icon-close"
+              :class="[
+                'position-absolute',
+                'top-0',
+                'start-100',
+                'translate-middle',
+              ]"
+              @click="delete_file(msg.sect, i)"
+            ></el-button>
+          </div>
+        </div>
       </template>
 
       <template v-else-if="msg.sect == 'FILE'">
