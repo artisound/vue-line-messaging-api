@@ -25,3 +25,7 @@
     border-radius: 2% 2% 0 0;
     padding: 7px 20px;
 }
+
+.el-dialog__title {
+    color: #fff;
+}
