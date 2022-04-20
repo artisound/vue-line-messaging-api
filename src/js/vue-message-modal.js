@@ -37,7 +37,6 @@ Vue.component('vue-modal', {
   },
   mounted() {
     const config = this.config;
-    console.log(this.stickers);
 
     if(config.msg_sect.length) {
       const primary_sect = config.msg_sect[0];
@@ -74,10 +73,7 @@ Vue.component('vue-modal', {
       return obj;
     },
     changeMsgType(sect, i) {
-      console.log(sect);
       const msgType = this.objMsgType(sect);
-      console.log(i);
-      console.log(msgType);
       this.$set(this.messages, i, msgType);
     },
     selectSticker(packageId, stickerId, msgNum) {
@@ -85,6 +81,9 @@ Vue.component('vue-modal', {
       msgType.format.packageId = packageId;
       msgType.format.stickerId = stickerId;
       this.$set(this.messages, msgNum, msgType);
+    },
+    changeSelectFile(file) {
+      console.log(file)
     }
   },
   template: `
@@ -101,9 +100,16 @@ Vue.component('vue-modal', {
       <el-radio v-model="radio" label="今すぐ配信">今すぐ配信</el-radio>
     </div>
 
-    <el-card v-for="(msg, i) in messages" :key="i">
+    <el-card
+      class="mb-2"
+      v-for="(msg, i) in messages"
+      :key="i"
+    >
       <div class="d-flex justify-content-between" slot="header">
-        <el-radio-group v-model="msg.sect">
+        <el-radio-group
+          v-model="msg.sect"
+          @change="changeMsgType(msg.sect, i)"
+        >
           <el-tooltip
             v-for="obj in objContents"
             placement="top"
@@ -121,18 +127,18 @@ Vue.component('vue-modal', {
         <el-button-group>
           <el-button
             :disabled="i == 0 ? true : false"
-            @click=""
+            @click="messages.splice(i - 1, 1, ...messages.splice(i, 1, messages[i - 1]))"
           ><i class="fas fa-chevron-up"></i></el-button>
           <el-button
-            :disabled="messages.length == 1 && i == messages.length - 1 ? true : false"
-            @click=""
+            :disabled="messages.length == 1 || i == messages.length - 1 ? true : false"
+            @click="messages.splice(i, 1, ...messages.splice(i + 1, 1, messages[i]))"
           ><i class="fas fa-chevron-down"></i></el-button>
           <el-button
-            @click=""
+            @click="$set(messages, i, objMsgType(msg.sect));"
           ><i class="fas fa-eraser"></i></el-button>
           <el-button
             :disabled="messages.length == 1 ? true : false"
-            @click=""
+            @click="messages.splice(i, 1);"
           ><i class="fas fa-times"></i></el-button>
         </el-button-group>
       </div>
@@ -155,7 +161,6 @@ Vue.component('vue-modal', {
       </template>
 
       <template v-else-if="msg.sect == 'STICKER'">
-        {{msg.format}}
         <el-tabs v-model="sticker_tab" type="border-card">
           <el-tab-pane
             v-for="(package, name) in stickers"
@@ -209,15 +214,24 @@ Vue.component('vue-modal', {
       </template>
 
       <template v-else-if="msg.sect == 'IMAGE'">
-        <div class="modePanel mode-IMAGE">
-          <form class="upload-file user-icon-dnd-wrapper">
-            <input type="file" name="upFile" class="inputForm input_image" accept="image/png,image/jpeg,image/jpg" />
-            <div class="preview_field"></div>
-            <div class="drop_area modal-border text-center" style="padding:22px;"><a>写真をアップロード</a><div style="color:#adadad"><i class="far fa-image fa-3x"></i></div></div>
-            <div class="icon_clear_button"><i class="far fa-window-close fa-2x"></i></div>
-          </form>
-          <small class="form-text text-muted small">ファイル形式：JPG、JPEG、PNG<br>ファイルサイズ：10MB以下</small>
-        </div>
+        <el-upload
+          drag
+          action="https://timeconcier.jp/forline/tccom/v2/tcLibFileUpload/"
+          accept="image/jpeg,image/png"
+          class="w-100"
+          :multiple="false"
+          :on-change="(file) => {
+            console.log(i)
+            console.log(file)
+            const reader = new FileReader()
+            reader.readAsDataURL(file.raw)
+            return reader.result
+          }"
+        >
+          <i class="el-icon-upload"></i>
+          <div class="el-upload__text">ドラッグまたは<em>クリック</em>で写真をアップロード</div>
+          <div class="el-upload__tip" slot="tip">jpg/png files with a size less than 500kb</div>
+        </el-upload>
       </template>
 
       <template v-else-if="msg.sect == 'FILE'">
@@ -245,10 +259,21 @@ Vue.component('vue-modal', {
 
     </el-card>
 
-    <span>This is a message</span>
+    <div class="mt-3 d-flex justify-content-end">
+      <el-button
+        type="primary"
+        :disabled="messages.length < 5 ? false : true"
+        @click="messages.push( objMsgType('TEXT') )"
+      >メッセージを追加</el-button>
+    </div>
     <span slot="footer" class="dialog-footer">
       <el-button @click="$emit('change', false)">キャンセル</el-button>
-      <el-button type="primary" @click="$emit('change', false)">確認</el-button>
+      <el-button
+        type="primary"
+        @click="() => {
+          console.log(messages)
+        }"
+      >確認</el-button>
     </span>
   </el-dialog>
   `
