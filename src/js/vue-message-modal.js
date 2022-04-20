@@ -9,7 +9,8 @@ Vue.component('vue-modal', {
       radio: '今すぐ配信',
       contentsRadio: '',
       messages: [],
-      stickers: [],
+      stickers: stickers(),
+      sticker_tab: Object.keys( stickers() )[0],
       isReply: false,
       objContents: [
         { label: 'テキスト',          value: 'TEXT',         icon: 'far fa-comment' },
@@ -36,7 +37,7 @@ Vue.component('vue-modal', {
   },
   mounted() {
     const config = this.config;
-    console.log(stickers());
+    console.log(this.stickers);
 
     if(config.msg_sect.length) {
       const primary_sect = config.msg_sect[0];
@@ -78,6 +79,12 @@ Vue.component('vue-modal', {
       console.log(i);
       console.log(msgType);
       this.$set(this.messages, i, msgType);
+    },
+    selectSticker(packageId, stickerId, msgNum) {
+      const msgType = this.objMsgType('STICKER');
+      msgType.format.packageId = packageId;
+      msgType.format.stickerId = stickerId;
+      this.$set(this.messages, msgNum, msgType);
     }
   },
   template: `
@@ -145,6 +152,60 @@ Vue.component('vue-modal', {
             <el-checkbox v-if="config.msg_reply" v-model="isReply">返信を受け付けする</el-checkbox>
           </div>
         </div>
+      </template>
+
+      <template v-else-if="msg.sect == 'STICKER'">
+        {{msg.format}}
+        <el-tabs v-model="sticker_tab" type="border-card">
+          <el-tab-pane
+            v-for="(package, name) in stickers"
+            :key="name"
+            :label="name"
+            :name="name"
+          >
+            <div
+              :class="[
+                'row',
+                'd-flex',
+                'flex-wrap',
+                'align-items-stretch',
+                'g-2',
+              ]"
+            >
+              <div
+                v-for="(stickerId, s) in package.stickerId"
+                :key="stickerId"
+                :class="[
+                  'col-6',
+                  'col-md-2',
+                  'col-sm-4',
+                  'd-flex',
+                ]"
+                :style="{
+                  cursor: 'pointer',
+                }"
+                @click="selectSticker(package.packageId, stickerId, i)"
+              >
+                <el-card
+                  class="d-flex align-items-center"
+                  :body-style="{ padding: '0px' }"
+                  :style="{
+                    backgroundColor: msg.format.stickerId == stickerId ? '#a0cfff' : 'white',
+                  }"
+                >
+                  <img
+                    class="d-blick image w-100"
+                    :src="'https://stickershop.line-scdn.net/stickershop/v1/sticker/'+stickerId+'/android/sticker.png'"
+                    :style="{
+                      display: 'block',
+                      width: '100%',
+                    }"
+                  >
+                </el-card>
+              </div>
+            </div>
+          </el-tab-pane>
+        </el-tabs>
       </template>
 
       <template v-else-if="msg.sect == 'IMAGE'">
