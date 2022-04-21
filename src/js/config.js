@@ -54,6 +54,10 @@
             richmenuId_normal: '',  // 受信BOXリッチメニューID(バッジ無し)
             richmenuId_badged: '',  // 受信BOXリッチメニューID(バッジ有り)
           },
+          sync_liff: {
+            init: '',
+            reply: '',
+          }
         },
         views : [],
         fields: [],
@@ -78,7 +82,11 @@
       const config = kintone.plugin.app.getConfig(PLUGIN_ID);
       if(config.data) {
         const json = this.parse(config.data);
-        if (Object.keys(json).length) this.config = json;
+        if (Object.keys(json).length) {
+          for (let key in json) {
+            this.config[key] = json[key];
+          }
+        }
       }
 
 
