@@ -15,6 +15,7 @@
     "js": [
       "https://unpkg.com/@kintone/rest-api-client@latest/umd/KintoneRestAPIClient.min.js",
       "https://cdn.jsdelivr.net/npm/axios@0/dist/axios.min.js",
+      "https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js",
       "https://cdn.jsdelivr.net/npm/vue@2/dist/vue.min.js",
       "https://unpkg.com/element-ui/lib/index.js",
       "https://cdn.jsdelivr.net/npm/quill@1/dist/quill.min.js",
