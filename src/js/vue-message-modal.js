@@ -168,22 +168,25 @@ Vue.component('vue-modal', {
       }
       console.groupEnd();
     },
-    async sendLineMessage() {
-      console.group('sendLineMessage');
-      const config = this.config;
-      const confirm = await this.$confirm('該当のお客様にメッセージを送信します。<br>送信後は取り消すことができません。<br>よろしいですか？', '確認', {
-        confirmButtonText: '送信',
-        cancelButtonText: 'キャンセル',
-        dangerouslyUseHTMLString: true,
-        type: 'warning'
-      }).then(() => {
-        return true;
-      }).catch(() => {
-        return false;
-      });
 
+    async send_lineMessage() {
+      console.group('send_lineMessage()');
+      const config = this.config;
+      const confirm = await this.$confirm(
+        '該当のお客様にメッセージを送信します。<br>送信後は取り消すことができません。<br>よろしいですか？', // メッセージボディ
+        '確認', // ヘッダータイトル
+        {
+          confirmButtonText: '送信',
+          cancelButtonText: 'キャンセル',
+          dangerouslyUseHTMLString: true,
+          type: 'warning'
+        }).then(_ => { return true; }).catch(_ => { return false; });
+      // キャンセルボタン押下
       if(!confirm) return;
 
+      /** ***************************************************
+       * メッセージ配列作成
+       *************************************************** */
       const messages = [];
       this.messages.forEach(msg => {
         switch(msg.sect) {
@@ -205,70 +208,76 @@ Vue.component('vue-modal', {
             break;
         }
       });
-
+      // メッセージなし
       if(!messages.length) {
         this.$message({
           type: 'error',
           message: '送信するメッセージの内容が正しくありません。'
         });
+        return;
       }
 
+      /** ***************************************************
+       * 送信対象者配列作成
+       *************************************************** */
       const targets = await this.get_targets();
       const lineIds = [];
-      if(Array.isArray(targets) && targets.length) {
-        targets.forEach(tg => {
+      if(targets) {
+        if(Array.isArray(targets) && targets.length) {
+          // 一覧画面から取得
+          targets.forEach(tg => {
+            if(config.sync_thisApp.lineId) {
+              const lineId = tg[config.sync_thisApp.lineId].value;
+              if(lineId) lineIds.push(lineId);
+            }
+          })
+        } else {
+          // 詳細画面から取得
           if(config.sync_thisApp.lineId) {
-            const lineId = tg[config.sync_thisApp.lineId].value;
+            const lineId = targets[config.sync_thisApp.lineId].value;
             if(lineId) lineIds.push(lineId);
           }
-        })
-      } else {
-        if(config.sync_thisApp.lineId) {
-          const lineId = targets[config.sync_thisApp.lineId].value;
-          if(lineId) lineIds.push(lineId);
         }
       }
-      console.log('lineIds', lineIds);
-      console.log('messages', messages);
-
-      if(lineIds.length) {
-        const exec_url = 'https://timeconcier.jp/forline/tccom/v2/tcLibLINE/';
-        await axios.post(exec_url, {
-          accessToken: config.sync_line.channel_token,
-          action: 'multicastMessage',
-          data: {
-            to      : lineIds,
-            messages: messages,
-          }
-        }).then(resp => {
-          console.log(resp);
-          if(resp.data && !Object.keys(resp.data).length) {
-            this.$message({
-              type: 'success',
-              message: 'メッセージが送信されました。'
-            });
-
-            // ダイアログを閉じる
-            this.$emit('change', false);
-          } else {
-            this.$message({
-              type: 'error',
-              message: 'メッセージの送信に失敗しました。'
-            });
-          }
-        }).catch(err => {
-          console.log(err);
-          this.$message({
-            type: 'error',
-            message: 'メッセージの送信に失敗しました。'
-          });
-        })
-      } else {
+      // 対象者なし
+      if(!lineIds.length) {
         this.$message({
           type: 'error',
           message: '該当のお客様が存在しません。'
         });
+        return;
       }
+
+      /** ***************************************************
+       * LINE メッセージ送信
+       *************************************************** */
+      const exec_url = 'https://timeconcier.jp/forline/tccom/v2/tcLibLINE/';
+      const send_msg = await axios.post(exec_url, {
+        accessToken: config.sync_line.channel_token,
+        action: 'multicastMessage',
+        data: {
+          to      : lineIds,
+          messages: messages,
+        }
+      }).then(resp => {
+        console.log(resp);
+        return (resp.data && !Object.keys(resp.data).length) ? true : false;
+      }).catch(console.error)
+
+      if(!send_msg) {
+        this.$message({
+          type: 'error',
+          message: 'メッセージの送信に失敗しました。'
+        });
+      }
+
+      // this.$message({
+      //   type: 'success',
+      //   message: 'メッセージが送信されました。'
+      // });
+
+      // // ダイアログを閉じる
+      // this.$emit('change', false);
       console.groupEnd();
     },
     changeSelectFile(file) {
@@ -608,7 +617,7 @@ Vue.component('vue-modal', {
       <el-button @click="$emit('change', false)">キャンセル</el-button>
       <el-button
         type="primary"
-        @click="sendLineMessage"
+        @click="send_lineMessage"
       >送信</el-button>
     </span>
   </el-dialog>

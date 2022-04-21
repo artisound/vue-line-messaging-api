@@ -7,7 +7,7 @@
   <h3>ボタン設定</h3>
   <div class="mb-5 d-flex flex-wrap gap-3">
 
-    <div class="col-12 mb-0 ExplanationLabel">一括送信ボタンを表示する一覧IDを入力します</div>
+    <div class="col-12 mb-0 ExplanationLabel">一括送信ボタンを表示する一覧ID</div>
       <div class="col-3 d-flex flex-column">
         <div class="kuc-label w-100">
           一覧設定
@@ -30,7 +30,7 @@
         </span>
     </div>
 
-    <div class="col-12 mb-0 ExplanationLabel">レコード編集・詳細画面に表示する「LINEメッセージ送信ボタン」についての情報を入力します</div>
+    <div class="col-12 mb-0 ExplanationLabel">レコード編集・詳細画面に表示する「LINEメッセージ送信ボタン」についての情報</div>
     <div class="col-3 d-flex flex-column">
       <div class="kuc-label">
         ボタン名<span class="kuc-require">*</span>
@@ -73,11 +73,12 @@
   <h3>LINEメッセージ送信機能</h3>
   <div class="mb-5 d-flex flex-wrap gap-3">
 
-    <div class="col-12 mb-0 ExplanationLabel">使用するLINEメッセージ種別を選択します</div>
+    <div class="col-12 mb-0 ExplanationLabel">使用するLINEメッセージ種別を選択</div>
 
     <div class="col-12 d-flex flex-column">
       <div class="col-12 kuc-label">
-        <span style="">送信メッセージ種別</span><span class="kuc-require">*</span>
+        <span>送信メッセージ種別</span>
+        <span class="kuc-require">*</span>
       </div>
 
       <div class="col-12 d-flex flex-wrap gap-1">
@@ -101,71 +102,61 @@
     </div>
 
 
-    <div class="col-12 mb-0 ExplanationLabel">メッセージの詳細設定です</div>
-    <div class="col-12 d-flex flex-wrap gap-2">
+    <div class="col-12 mb-0 ExplanationLabel">メッセージの詳細設定</div>
+      <div class="col-12 d-flex flex-wrap gap-2">
 
-      <div class="col-3 d-flex flex-column" style="background-color:#f0f0f0;">
-        <div class="col-12 kuc-label">
-          <span>一度のメッセージ数上限</span><span class="kuc-require">*</span>
+        <div class="col-2 d-flex flex-column py-2 px-3 rounded-3" style="background-color:#f0f0f0;">
+          <div class="col-12 kuc-label">
+            <span>一度のメッセージ数上限</span><span class="kuc-require">*</span>
+          </div>
+          <div class="col-12 simpleSel ssel1">
+            <select
+              required
+              v-model="config.msg_max"
+              class="form-val"
+            >
+              <option
+                v-for="i in 3"
+                :key="i"
+                :value="i"
+              >{{ i }}通</option>
+            </select>
+          </div>
         </div>
-        <div class="col-12 simpleSel ssel1">
-          <select
-            required
-            v-model="config.msg_max"
-            class="form-val"
-          >
-            <option
-              v-for="i in 3"
-              :key="i"
-              :value="i"
-            >{{ i }}通</option>
-          </select>
-        </div>
-      </div>
 
-      <div class="col-3 d-flex flex-column" style="background-color:#f0f0f0;">
-        <div class="kuc-label"><span>使用するテキストオプション</span></div>
-        <span
-          v-for="(opt, i) in msg_options"
-          :key="i"
-          class="kuc-input-checkbox-item"
-        >
-          <input
-            v-model="config.msg_option[opt.property]"
-            class="form-chk"
-            type="checkbox"
-            :id="'chk-msg_option-'+i"
-            :value="opt.label"
+        <div class="col-2 d-flex flex-column py-2 px-3 rounded-3" style="background-color:#f0f0f0;">
+          <div class="kuc-label"><span>使用するテキストオプション</span></div>
+          <span
+            v-for="(opt, i) in msg_options"
+            :key="i"
+            class="kuc-input-checkbox-item"
           >
-          <label :for="'chk-msg_option-'+i">{{ opt.label }}</label>
-        </span>
-      </div>
-  
-      <div class="box optionContainer">
-        <div class="kuc-label"><span>返信を受付</span></div>
-        <span class="kuc-input-checkbox-item">
-          <input
-            id="chk-msg_reply"
-            class="form-chk"
-            type="checkbox"
-            v-model="config.msg_reply"
-          >
-          <label for="chk-msg_reply">受け付ける</label>
-        </span>
+            <input
+              v-model="config.msg_option[opt.property]"
+              class="form-chk"
+              type="checkbox"
+              :id="'chk-msg_option-'+i"
+              :value="opt.label"
+            >
+            <label :for="'chk-msg_option-'+i">{{ opt.label }}</label>
+          </span>
+        </div>
+    
+        <div class="col-2 d-flex flex-column py-2 px-3 rounded-3" style="background-color:#f0f0f0;">
+          <div class="kuc-label"><span>返信を受付</span></div>
+          <span class="kuc-input-checkbox-item">
+            <input
+              id="chk-msg_reply"
+              class="form-chk"
+              type="checkbox"
+              v-model="config.msg_reply"
+            >
+            <label for="chk-msg_reply">受け付ける</label>
+          </span>
+        </div>
       </div>
     </div>
   </div>
-  <div class="boxContainer">
-    <div class="ExplanationLabel">使用するLINEメッセージ種別を選択します</div>
-
-
-  </div>
-
-  <div class="boxContainer">
-    <div class="ExplanationLabel">メッセージの詳細設定です</div>
-
-  </div>
-
 
   <!-------------------------------------------------------------------------->
   <!-- 連携情報                                                             -->
