@@ -45,3 +45,7 @@
 .el-checkbox__label {
     padding-left: 2px;
 }
+
+.el-tabs__content {
+    padding: 0;
+}

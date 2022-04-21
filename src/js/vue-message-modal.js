@@ -68,14 +68,24 @@ Vue.component('vue-modal', {
       return;
     },
 
-    objectToArrayByKey(object, key) {
+    /** ******************************************************************************************************
+     * 配列オブジェクトから指定のキーの値を出力
+     * @param {Array} object  - 配列オブジェクト
+     * @param {String} key    - パラメータ名
+     * @param {String} join   - 結合文字列
+     ****************************************************************************************************** */
+    objectToArrayByKey(object, key, join = null) {
       const ret_arr = [];
       if(Array.isArray(object)) {
         object.forEach( (obj, i) => ret_arr.push(obj[key]) );
       }
-      return ret_arr;
+      return join ? ret_arr.join(join) : ret_arr;
     },
 
+    /** ******************************************************************************************************
+     * 各メッセージフォーマット初期値出力
+     * @param {String} sect - TEXT | STICKER | FILE | RICHTEXT | INFORMATION
+     ****************************************************************************************************** */
     objMsgType(sect) {
       const obj = { sect: sect };
       switch(sect) {
@@ -117,36 +127,6 @@ Vue.component('vue-modal', {
       }
       return obj;
     },
-    changeTextMessageFormat(obj, i) {
-      let format;
-      if(obj.reply) {
-        const liffId = this.config.liff ? this.config.liff.reply.id : '';
-        const params = this.config.liff ? '?'+this.config.liff.reply.params : '';
-        format = {
-          type: 'template',
-          altText: 'メッセージが届きました。',
-          template: {
-            type: 'buttons',
-            text: obj.format.text,
-            actions: [{ type: 'uri', label: '返信', uri: `https://liff.line.me/${liffId}${params}` }]
-          }
-        };
-      } else {
-        format = { type: 'text', text: obj.format.template.text };
-      }
-      this.$set(this.messages[i], 'format', format);
-      console.log(this.messages[i]);
-    },
-    changeMsgType(sect, i) {
-      const msgType = this.objMsgType(sect);
-      this.$set(this.messages, i, msgType);
-    },
-    selectSticker(packageId, stickerId, msgNum) {
-      const msgType = this.objMsgType('STICKER');
-      msgType.format.packageId = packageId;
-      msgType.format.stickerId = stickerId;
-      this.$set(this.messages, msgNum, msgType);
-    },
 
     async get_targets() {
       console.group('get_targets()');
@@ -169,6 +149,13 @@ Vue.component('vue-modal', {
       console.groupEnd();
     },
 
+    async get_manager(appId, recId) {
+      
+    },
+
+    /** ******************************************************************************************************
+     * LINE メッセージ送信
+     ****************************************************************************************************** */
     async send_lineMessage() {
       console.group('send_lineMessage()');
       const config = this.config;
@@ -271,19 +258,22 @@ Vue.component('vue-modal', {
         });
       }
 
-      // this.$message({
-      //   type: 'success',
-      //   message: 'メッセージが送信されました。'
-      // });
+      this.$message({
+        type: 'success',
+        message: 'メッセージが送信されました。'
+      });
 
       // // ダイアログを閉じる
       // this.$emit('change', false);
       console.groupEnd();
     },
-    changeSelectFile(file) {
-      console.log(file)
-    },
-    async delete_file(sect, i) {
+
+    /** ******************************************************************************************************
+     * メッセージフォーマットリセット
+     * @param {Objecy} sect - TEXT | STICKER | FILE | RICHTEXT | INFORMATION
+     * @param {Number} i    - 配列番号
+     ****************************************************************************************************** */
+    async message_reset(sect, i) {
       const msgType = this.objMsgType(sect);
       this.$set(this.messages, i, msgType);
     }
@@ -310,20 +300,22 @@ Vue.component('vue-modal', {
       <div class="d-flex justify-content-between" slot="header">
         <el-radio-group
           v-model="msg.sect"
-          @change="changeMsgType(msg.sect, i)"
+          @change="message_reset(msg.sect, i)"
         >
-          <el-tooltip
-            v-for="obj in objContents"
-            placement="top"
-            :content="obj.label"
-          >
-            <el-radio-button
-              v-if="config.msg_sect.includes(obj.value)"
-              :label="obj.value"
+          <template v-for="(obj, i) in objContents">
+            <el-tooltip
+              placement="top"
+              :key="i"
+              :content="obj.label"
             >
-              <i :class="obj.icon"></i>
-            </el-radio-button>
-          </el-tooltip>
+              <el-radio-button
+                v-if="config.msg_sect.includes(obj.value)"
+                :label="obj.value"
+              >
+                <i :class="obj.icon"></i>
+              </el-radio-button>
+            </el-tooltip>
+          </template>
         </el-radio-group>
 
         <el-button-group>
@@ -371,7 +363,24 @@ Vue.component('vue-modal', {
             <el-checkbox
               v-if="config.msg_reply"
               v-model="msg.reply"
-              @change="changeTextMessageFormat(msg, i)"
+              @change="() => {
+                let format;
+                if(msg.reply) {
+                  const liffId = config.syncliff ? config.sync_liff.reply : '';
+                  format = {
+                    type: 'template',
+                    altText: 'メッセージが届きました。',
+                    template: {
+                      type: 'buttons',
+                      text: msg.format.text,
+                      actions: [{ type: 'uri', label: '返信', uri: 'https://liff.line.me/'+liffId }]
+                    }
+                  };
+                } else {
+                  format = { type: 'text', text: msg.format.template.text };
+                }
+                $set(messages[i], 'format', format);
+              }"
             >返信を受け付けする</el-checkbox>
           </div>
         </div>
@@ -411,7 +420,12 @@ Vue.component('vue-modal', {
                 :style="{
                   cursor: 'pointer',
                 }"
-                @click="selectSticker(package.packageId, stickerId, i)"
+                @click="() => {
+                  const msgType = objMsgType('STICKER');
+                  msgType.format.packageId = package.packageId;
+                  msgType.format.stickerId = stickerId;
+                  $set(messages, i, msgType);
+                }"
               >
                 <el-card
                   class="d-flex align-items-center"
@@ -498,7 +512,7 @@ Vue.component('vue-modal', {
                 'start-100',
                 'translate-middle',
               ]"
-              @click="delete_file(msg.sect, i)"
+              @click="message_reset(msg.sect, i)"
             ></el-button>
           </div>
         </div>
@@ -509,7 +523,7 @@ Vue.component('vue-modal', {
           v-if="!msg.url"
           drag
           action="https://timeconcier.jp/forline/tccom/v2/tcLibFileUpload/"
-          :accept="objectToArrayByKey(config.file_upload_accept, 'value').join(',')"
+          :accept="objectToArrayByKey(config.file_upload_accept, 'value', ',')"
           :limit="1"
           :show-file-list="false"
           :http-request="async data => {
@@ -543,7 +557,7 @@ Vue.component('vue-modal', {
           <i class="el-icon-upload"></i>
           <div class="el-upload__text">ドラッグまたは<em>クリック</em>でアップロード</div>
           <div class="el-upload__tip d-flex flex-column" slot="tip">
-            <small>送信可能なファイル：{{objectToArrayByKey(config.file_upload_accept, 'label').join('/')}}</small>
+            <small>送信可能なファイル：{{objectToArrayByKey(config.file_upload_accept, 'label', '/')}}</small>
             <small>※タイムコンシェル社にアップロードしたファイルURLを送信します。</small>
             <small>※ファイル保存期間は1週間です。</small>
           </div>
@@ -568,7 +582,7 @@ Vue.component('vue-modal', {
                 'start-100',
                 'translate-middle',
               ]"
-              @click="delete_file(msg.sect, i)"
+              @click="message_reset(msg.sect, i)"
             ></el-button>
             <span>{{msg.origin_name}}</span>
           </div>
