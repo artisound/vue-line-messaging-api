@@ -71,12 +71,16 @@ Vue.component('vue-modal', {
           obj['format'] = { type: 'sticker', packageId: '', stickerId: '' };
           break;
         case 'IMAGE':
-          obj['format']    = { type: 'image', originalContentUrl: '', previewImageUrl: '' };
-          obj['dialog']    = false;
-          obj['path'] = '';
+          obj['format'] = { type: 'image', originalContentUrl: '', previewImageUrl: '' };
+          obj['dialog'] = false;
+          obj['path']   = '';
           break;
         case 'FILE':
-          obj['url'] = '';
+          obj['format']       = {};
+          obj['url']          = '';
+          obj['origin_name']  = '';
+          obj['name']         = '';
+          obj['path']         = '';
           break;
         case 'RICHTEXT':
           obj['contents'] = '';
@@ -154,7 +158,7 @@ Vue.component('vue-modal', {
           ><i class="fa-solid fa-chevron-down"></i></el-button>
           <el-button
             @click="$set(messages, i, objMsgType(msg.sect));"
-          ><i class="fa-solid fa-erase"></i></el-button>
+          ><i class="fa-solid fa-eraser"></i></el-button>
           <el-button
             :disabled="messages.length == 1 ? true : false"
             @click="messages.splice(i, 1);"
@@ -247,10 +251,81 @@ Vue.component('vue-modal', {
           :show-file-list="false"
           :on-preview="msg.format.previewImageUrl"
           :multiple="false"
+          :http-request="async data => {
+            const async_url = 'https://timeconcier.jp/forline/tccom/v2/tcLibFileUpload/';
+            const fd        = new FormData();
+            fd.append('files[0]', data.file);
+            fd.append('period', '1w');
+
+            const uploaded_file = await axios.post(async_url, fd, {
+              headers: { 'Content-Type': 'multipart/form-data' },
+            }).then(resp => {
+              return resp.status == 200 ? resp.data : resp;
+            }).catch(err => {
+              console.error(err)
+            });
+            console.log(uploaded_file)
+            if(uploaded_file.length) {
+              $set(msg.format, 'originalContentUrl',  uploaded_file[0].url);
+              $set(msg.format, 'previewImageUrl',     uploaded_file[0].url);
+              $set(msg, 'path', uploaded_file[0].path + uploaded_file[0].name);
+            }
+          }"
+        >
+          <i class="el-icon-upload"></i>
+          <div class="el-upload__text">ドラッグまたは<em>クリック</em>でアップロード</div>
+          <div class="el-upload__tip d-flex flex-column" slot="tip">
+            <small style="line-height:initial;">※タイムコンシェル社にアップロードしたファイルURLを送信します。</small>
+            <small style="line-height:initial;">※ファイル保存期間は1週間です。</small>
+          </div>
+        </el-upload>
+        <div
+          v-else
+          :class="[
+            'd-flex',
+            'justify-content-center',
+            'mt-3',
+          ]"
+        >
+          <div class="position-relative">
+            <img
+              :src="msg.format.previewImageUrl"
+              :style="{
+                maxWidth: '200px',
+                display: 'block',
+              }"
+            >
+            <el-button
+              circle
+              type="danger"
+              icon="el-icon-close"
+              :class="[
+                'position-absolute',
+                'top-0',
+                'start-100',
+                'translate-middle',
+              ]"
+              @click="delete_file(msg.sect, i)"
+            ></el-button>
+          </div>
+        </div>
+      </template>
+
+      <template v-else-if="msg.sect == 'FILE'">
+        <el-upload
+          v-if="!msg.format.previewImageUrl"
+          drag
+          action="https://timeconcier.jp/forline/tccom/v2/tcLibFileUpload/"
+          accept=""
+          :limit="1"
+          :show-file-list="false"
+          :on-preview="msg.format.previewImageUrl"
+          :multiple="false"
           :http-request="async (data) => {
             const async_url = 'https://timeconcier.jp/forline/tccom/v2/tcLibFileUpload/';
             const fd        = new FormData();
             fd.append('file', data.file);
+            $set(msg, 'origin_name',  data.file.name);
 
             const uploaded_file = await axios.post(async_url, fd, {
               headers: { 'Content-Type': 'multipart/form-data' },
@@ -261,9 +336,9 @@ Vue.component('vue-modal', {
             });
             console.log(uploaded_file)
             if(uploaded_file.url) {
-              $set(messages[i].format, 'originalContentUrl', uploaded_file.url);
-              $set(messages[i].format, 'previewImageUrl', uploaded_file.url);
-              $set(messages[i], 'path', uploaded_file.path + uploaded_file.name);
+              $set(msg, 'url',  uploaded_file.url);
+              $set(msg, 'name', uploaded_file.name);
+              $set(msg, 'path', uploaded_file.path + uploaded_file.name);
             }
           }"
         >
@@ -302,18 +377,6 @@ Vue.component('vue-modal', {
               @click="delete_file(msg.sect, i)"
             ></el-button>
           </div>
-        </div>
-      </template>
-
-      <template v-else-if="msg.sect == 'FILE'">
-        <div class="modePanel mode-FILE">
-          <form class="upload-file user-icon-dnd-wrapper">
-            <input type="file" name="upFile" class="inputForm input_file" accept="text/plain,.xlsx,.docx,.pdf" />
-            <div class="preview_field"></div>
-            <div class="drop_area modal-border text-center" style="padding:22px;"><a>ファイルをアップロード</a><div style="color:#adadad"><i class="far fa-file fa-3x"></i></div></div>
-            <div class="icon_clear_button"><i class="far fa-window-close fa-2x"></i></div>
-          </form>
-          <small class="form-text text-muted small">※タイムコンシェル社にアップロードしたファイルURLを送信します<br>※ファイル保存期間は1週間</small>
         </div>
       </template>
 
