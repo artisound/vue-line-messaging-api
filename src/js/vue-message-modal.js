@@ -21,6 +21,14 @@ Vue.component('vue-modal', {
       ]
     }
   },
+  watch: {
+    dialog(aft) {
+      if(!aft) {
+        this.messages = [];
+        this.messages.push(this.objMsgType('TEXT'));
+      }
+    }
+  },
   computed: {
     toggleDialog: {
       get() {
@@ -161,26 +169,107 @@ Vue.component('vue-modal', {
       console.groupEnd();
     },
     async sendLineMessage() {
+      console.group('sendLineMessage');
+      const config = this.config;
+      const confirm = await this.$confirm('該当のお客様にメッセージを送信します。<br>送信後は取り消すことができません。<br>よろしいですか？', '確認', {
+        confirmButtonText: '送信',
+        cancelButtonText: 'キャンセル',
+        dangerouslyUseHTMLString: true,
+        type: 'warning'
+      }).then(() => {
+        return true;
+      }).catch(() => {
+        return false;
+      });
+
+      if(!confirm) return;
+
       const messages = [];
       this.messages.forEach(msg => {
         switch(msg.sect) {
           case 'TEXT':
-            if(msg.format['text']) messages.push(msg.format)
+            if(msg.reply) {
+              if(msg.format.template.text) messages.push(msg.format)
+            } else {
+              if(msg.format.text) messages.push(msg.format)
+            }
             break;
           case 'STICKER':
-            if(msg.format['packageId']) messages.push(msg.format)
+            if(msg.format.packageId) messages.push(msg.format)
             break;
           case 'IMAGE':
-            if(msg.format['originalContentUrl']) messages.push(msg.format)
+            if(msg.format.originalContentUrl) messages.push(msg.format)
             break;
           case 'FILE':
-            if(msg.format['altText']) messages.push(msg.format)
+            if(msg.format.altText) messages.push(msg.format)
             break;
         }
       });
 
-      const exec_url = 'https://timeconcier.jp/forline/tccom/v2/tcLibLINE/';
-      const send_msg = await axios.post(exec_url, ).then()
+      if(!messages.length) {
+        this.$message({
+          type: 'error',
+          message: '送信するメッセージの内容が正しくありません。'
+        });
+      }
+
+      const targets = await this.get_targets();
+      const lineIds = [];
+      if(Array.isArray(targets) && targets.length) {
+        targets.forEach(tg => {
+          if(config.sync_thisApp.lineId) {
+            const lineId = tg[config.sync_thisApp.lineId].value;
+            if(lineId) lineIds.push(lineId);
+          }
+        })
+      } else {
+        if(config.sync_thisApp.lineId) {
+          const lineId = targets[config.sync_thisApp.lineId].value;
+          if(lineId) lineIds.push(lineId);
+        }
+      }
+      console.log('lineIds', lineIds);
+      console.log('messages', messages);
+
+      if(lineIds.length) {
+        const exec_url = 'https://timeconcier.jp/forline/tccom/v2/tcLibLINE/';
+        await axios.post(exec_url, {
+          accessToken: config.sync_line.channel_token,
+          action: 'multicastMessage',
+          data: {
+            to      : lineIds,
+            messages: messages,
+          }
+        }).then(resp => {
+          console.log(resp);
+          if(resp.data && !Object.keys(resp.data).length) {
+            this.$message({
+              type: 'success',
+              message: 'メッセージが送信されました。'
+            });
+
+            // ダイアログを閉じる
+            this.$emit('change', false);
+          } else {
+            this.$message({
+              type: 'error',
+              message: 'メッセージの送信に失敗しました。'
+            });
+          }
+        }).catch(err => {
+          console.log(err);
+          this.$message({
+            type: 'error',
+            message: 'メッセージの送信に失敗しました。'
+          });
+        })
+      } else {
+        this.$message({
+          type: 'error',
+          message: '該当のお客様が存在しません。'
+        });
+      }
+      console.groupEnd();
     },
     changeSelectFile(file) {
       console.log(file)
@@ -414,7 +503,6 @@ Vue.component('vue-modal', {
           :accept="objectToArrayByKey(config.file_upload_accept, 'value').join(',')"
           :limit="1"
           :show-file-list="false"
-          :on-preview="msg.format.previewImageUrl"
           :http-request="async data => {
             const async_url = 'https://timeconcier.jp/forline/tccom/v2/tcLibFileUpload/';
             const fd        = new FormData();
@@ -433,7 +521,7 @@ Vue.component('vue-modal', {
               // メッセージテンプレート
               $set(msg.format,                      'altText',  data.file.name);
               $set(msg.format.template,             'title',    data.file.name);
-              $set(msg.format.template.actions[0],  'uri',      uploaded_file[0].url);
+              $set(msg.format.template.actions[0],  'uri',      uploaded_file[0].url + '?openExternalBrowser=1');
 
               $set(msg, 'url',          uploaded_file[0].url);
               $set(msg, 'origin_name',  data.file.name);
@@ -520,10 +608,8 @@ Vue.component('vue-modal', {
       <el-button @click="$emit('change', false)">キャンセル</el-button>
       <el-button
         type="primary"
-        @click="() => {
-          console.log(messages)
-        }"
-      >確認</el-button>
+        @click="sendLineMessage"
+      >送信</el-button>
     </span>
   </el-dialog>
   `
