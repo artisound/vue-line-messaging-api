@@ -3,11 +3,11 @@
   const config = kintone.plugin.app.getConfig(PLUGIN_ID)
   const data = (config.data && Object.keys( parse(config.data) ).length) ? parse(config.data) : {};
 
-  kintone.events.on('app.record.index.show', function() {
+  kintone.events.on(['app.record.index.show', 'app.record.detail.show'], event => {
     const spaceElement = kintone.app.getHeaderMenuSpaceElement();
     spaceElement.id = 'vue-app';
     spaceElement.innerHTML = '<el-button type="primary" @click="toggleDialog">LINEメッセージ</el-button>';
-    spaceElement.innerHTML += '<vue-modal v-model="dialog" :config="config" ></vue-modal>';
+    spaceElement.innerHTML += '<vue-modal v-model="dialog" :config="config" :kintone-event="kintoneEvent" ></vue-modal>';
 
     console.log(window);
     Vue.use(window.VueQuillEditor)
@@ -21,6 +21,7 @@
         return {
           config: data,
           dialog: false,
+          kintoneEvent: event,
           dialogVisible: false
         }
       },

@@ -3,7 +3,7 @@ Vue.component('vue-modal', {
     prop: 'dialog',
     event: 'change',
   },
-  props: ['dialog', 'config'],
+  props: ['dialog', 'config', 'kintoneEvent'],
   data() {
     return {
       radio: '今すぐ配信',
@@ -117,6 +117,33 @@ Vue.component('vue-modal', {
       msgType.format.packageId = packageId;
       msgType.format.stickerId = stickerId;
       this.$set(this.messages, msgNum, msgType);
+    },
+
+    async get_records() {
+      const exec_url = 'https://timeconcier.jp/forline/tccom/v2/tcLibLINE/';
+
+    },
+    async sendLineMessage() {
+      const messages = [];
+      this.messages.forEach(msg => {
+        switch(msg.sect) {
+          case 'TEXT':
+            if(msg.format['text']) messages.push(msg.format)
+            break;
+          case 'STICKER':
+            if(msg.format['packageId']) messages.push(msg.format)
+            break;
+          case 'IMAGE':
+            if(msg.format['originalContentUrl']) messages.push(msg.format)
+            break;
+          case 'FILE':
+            if(msg.format['altText']) messages.push(msg.format)
+            break;
+        }
+      });
+
+      const exec_url = 'https://timeconcier.jp/forline/tccom/v2/tcLibLINE/';
+      const send_msg = await axios.post(exec_url, ).then()
     },
     changeSelectFile(file) {
       console.log(file)
