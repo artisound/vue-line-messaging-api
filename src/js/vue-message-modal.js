@@ -11,7 +11,6 @@ Vue.component('vue-modal', {
       messages: [],
       stickers: stickers(),
       sticker_tab: Object.keys( stickers() )[0],
-      isReply: false,
       objContents: [
         { value: 'TEXT',        label: 'テキスト',  icon: 'fa-regular fa-comment' },
         { value: 'STICKER',     label: 'スタンプ',  icon: 'fa-regular fa-face-smile' },
@@ -74,6 +73,7 @@ Vue.component('vue-modal', {
       switch(sect) {
         case 'TEXT':
           obj['format'] = { type: 'text', text: '' };
+          obj['reply']  = false;
           break;
         case 'STICKER':
           obj['format'] = { type: 'sticker', packageId: '', stickerId: '' };
@@ -108,6 +108,26 @@ Vue.component('vue-modal', {
           break;
       }
       return obj;
+    },
+    changeTextMessageFormat(obj, i) {
+      let format;
+      if(obj.reply) {
+        const liffId = this.config.liff ? this.config.liff.reply.id : '';
+        const params = this.config.liff ? '?'+this.config.liff.reply.params : '';
+        format = {
+          type: 'template',
+          altText: 'メッセージが届きました。',
+          template: {
+            type: 'buttons',
+            text: obj.format.text,
+            actions: [{ type: 'uri', label: '返信', uri: `https://liff.line.me/${liffId}${params}` }]
+          }
+        };
+      } else {
+        format = { type: 'text', text: obj.format.template.text };
+      }
+      this.$set(this.messages[i], 'format', format);
+      console.log(this.messages[i]);
     },
     changeMsgType(sect, i) {
       const msgType = this.objMsgType(sect);
@@ -229,17 +249,32 @@ Vue.component('vue-modal', {
 
       <template v-if="msg.sect == 'TEXT'">
         <el-input
+          v-if="msg.reply"
+          show-word-limit
+          type="textarea"
+          v-model="msg.format.template.text"
+          placeholder="テキストを入力"
+          :maxlength="160"
+          :rows="10"
+        ></el-input>
+        <el-input
+          v-else
+          show-word-limit
           type="textarea"
           v-model="msg.format.text"
           placeholder="テキストを入力"
           :maxlength="500"
           :rows="10"
         ></el-input>
-        <div class="d-flex justify-content-between">
+        <div class="my-2 d-flex justify-content-end g-2">
           <div>
             <el-button v-if="config.msg_option.template">テンプレート</el-button>
             <el-button v-if="config.msg_option.embed_char">埋め込み文字</el-button>
-            <el-checkbox v-if="config.msg_reply" v-model="isReply">返信を受け付けする</el-checkbox>
+            <el-checkbox
+              v-if="config.msg_reply"
+              v-model="msg.reply"
+              @change="changeTextMessageFormat(msg, i)"
+            >返信を受け付けする</el-checkbox>
           </div>
         </div>
       </template>
@@ -474,7 +509,7 @@ Vue.component('vue-modal', {
     <div class="mt-3 d-flex justify-content-end">
       <el-button
         type="primary"
-        :disabled="messages.length < 5 ? false : true"
+        :disabled="messages.length < config.msg_max ? false : true"
         @click="messages.push( objMsgType('TEXT') )"
       >
         <i class="fa-solid fa-plus me-1"></i>
