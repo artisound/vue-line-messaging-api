@@ -57,6 +57,7 @@
       "css/51-modern-default.css",
       "css/kintone-ui-component.min.css",
       "css/config.css"
-    ]
+    ],
+    "required_params": [ "data" ]
   }
 }

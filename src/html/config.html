@@ -305,12 +305,14 @@
         </div>
       </div>
 
-      <div class="border p-3 d-flex flex-column gap-1">
+      <div class="border p-3 d-flex flex-column gap-2">
         <div class="d-flex flex-column">
           <span>標準設定</span>
           <span class="ms-3">顧客レコード番号　：[宛先検索ルックアップ(先方)]ルックアップ</span>
           <span class="ms-3">担当者レコード番号：[宛先検索ルックアップ(当方)]ルックアップ</span>
         </div>
+
+        <hr>
 
         <div class="d-flex flex-wrap gap-3">
           <div class="">
@@ -586,7 +588,6 @@
         <div class="">
           <div class="kuc-label">
             <span>アプリ番号</span>
-            <span class="kuc-require">*</span>
           </div>
 
           <input
@@ -598,15 +599,116 @@
           >
         </div>
 
-        <div class="mt-2 align-self-end d-flex flex-column">
-          <small class="d-block text-danger">※この辺りは、1kintone環境につき一か所でしか設定してはいけない</small>
-          <small class="d-block text-danger">※顧客管理に設定後、社員管理で設定したら後者で構成情報が上書きされるので対策必要(20210218未対応)</small>
+        <div class="">
+          <button
+            @click="get_formFields(config.sync_fileLogAppId, 'fields_fileLogApp')"
+            class="kuc-btn normal btn-margin"
+          >フォーム情報取得</button>
         </div>
+      </div>
+
+      <div class="border p-3 d-flex flex-column gap-2">
+        <div class="d-flex flex-wrap gap-3">
+          <div class="">
+            <div class="kuc-label">
+              <span>日付</span>
+            </div>
+
+            <div class="simpleSel ssel1">
+              <select
+                v-model="config.sync_fileLogApp.date"
+                class="form-val"
+              >
+                <option value="" selected>----</option>
+                  <template v-for="(fld, i) in fields_fileLogApp">
+                    <option
+                      v-if="['DATE'].includes(fld.type)"
+                      :key="i"
+                      :value="fld.code"
+                    >{{ fld.label }}</option>
+                  </template>
+              </select>
+            </div>
+          </div>
+
+          <div class="">
+            <div class="kuc-label">
+              <span>時刻</span>
+            </div>
+
+            <div class="simpleSel ssel1">
+              <select
+                v-model="config.sync_fileLogApp.time"
+                class="form-val"
+              >
+                <option value="" selected>----</option>
+                <template v-for="(fld, i) in fields_fileLogApp">
+                  <option
+                    v-if="['TIME'].includes(fld.type)"
+                    :key="i"
+                    :value="fld.code"
+                  >{{ fld.label }}</option>
+                </template>
+              </select>
+            </div>
+          </div>
+
+          <div class="">
+            <div class="kuc-label">
+              <span>送信対象</span>
+            </div>
+
+            <div class="simpleSel ssel1">
+              <select
+                v-model="config.sync_fileLogApp.target"
+                class="form-val"
+              >
+                <option value="" selected>----</option>
+                <template v-for="(fld, i) in fields_fileLogApp">
+                  <option
+                    v-if="['RADIO_BUTTON', 'DROP_DOWN'].includes(fld.type)"
+                    :key="i"
+                    :value="fld.code"
+                  >{{ fld.label }}</option>
+                </template>
+              </select>
+            </div>
+          </div>
+
+          <div class="">
+            <div class="kuc-label">
+              <span>添付ファイル</span>
+            </div>
+
+            <div class="simpleSel ssel1">
+              <select
+                v-model="config.sync_fileLogApp.file"
+                class="form-val"
+              >
+                <option value="" selected>----</option>
+                <template v-for="(fld, i) in fields_fileLogApp">
+                  <option
+                    v-if="['FILE'].includes(fld.type)"
+                    :key="i"
+                    :value="fld.code"
+                  >{{ fld.label }}</option>
+                </template>
+              </select>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+
+      <div class="mt-2 d-flex flex-column">
+        <small class="d-block text-danger">※この辺りは、1kintone環境につき一か所でしか設定してはいけない</small>
+        <small class="d-block text-danger">※顧客管理に設定後、社員管理で設定したら後者で構成情報が上書きされるので対策必要(20210218未対応)</small>
       </div>
 
       <div class="border-start border-5 border-info py-1 px-2 mt-2">LINE公式アカウント関係</div>
 
-      <div class="d-flex flex-column gap-1">
+      <div class="d-flex flex-column gap-2">
         <div class="d-flex flex-wrap gap-3">
           <div class="">
             <div class="kuc-label">
@@ -709,7 +811,7 @@
             >
           </div>
         </div>
-      <div class="d-flex flex-column gap-1">
+      <div class="d-flex flex-column gap-2">
       </div>
 
 

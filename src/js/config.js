@@ -47,6 +47,12 @@
             line_notification: false, // 受信時LINE通知
           },
           sync_fileLogAppId: '',  // 配信ファイルログ系アプリ - アプリ番号
+          sync_fileLogApp: {
+            date: '',   // 日付
+            time: '',   // 時刻
+            file: '',   // 添付ファイル
+            target: '', // 送信対象 (個別 | 一括)
+          },
           sync_line: {    // LINE公式アカウント
             channel_secret: '',   // チャネルシークレット
             channel_token: '',   // チャネルアクセストークン
@@ -62,6 +68,7 @@
         views : [],
         fields: [],
         spaces: [],
+        fields_fileLogApp: [],
         fields_deliveryLogApp: [],
         msg_classes: [
           { value: 'TEXT',        label: 'テキスト',  icon: 'fa-regular fa-comment' },
