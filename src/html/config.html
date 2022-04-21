@@ -327,7 +327,7 @@
                 class="form-val"
                 required
               >
-                <option value="" selected>----</option>
+                <option value="">----</option>
                 <template v-for="(fld, i) in fields_deliveryLogApp">
                   <option
                     v-if="['NUMBER'].includes(fld.type)"
@@ -351,7 +351,7 @@
                 class="form-val"
                 required
               >
-                <option value="" selected>----</option>
+                <option value="">----</option>
                 <template v-for="(fld, i) in fields_deliveryLogApp">
                   <option
                     v-if="['SINGLE_LINE_TEXT', 'MULTI_LINE_TEXT'].includes(fld.type)"
@@ -373,7 +373,7 @@
                 v-model="config.sync_deliveryLogApp.info_title"
                 class="form-val"
               >
-                <option value="" selected>----</option>
+                <option value="">----</option>
                 <template v-for="(fld, i) in fields_deliveryLogApp">
                   <option
                     v-if="['SINGLE_LINE_TEXT'].includes(fld.type)"
@@ -397,7 +397,7 @@
                 class="form-val"
                 required
               >
-                <option value="" selected>----</option>
+                <option value="">----</option>
                 <template v-for="(fld, i) in fields_deliveryLogApp">
                   <option
                     v-if="['SINGLE_LINE_TEXT', 'MULTI_LINE_TEXT'].includes(fld.type)"
@@ -419,7 +419,7 @@
                 v-model="config.sync_deliveryLogApp.info_category"
                 class="form-val"
               >
-                <option value="" selected>----</option>
+                <option value="">----</option>
                 <template v-for="(fld, i) in fields_deliveryLogApp">
                   <option
                     v-if="['RADIO_BUTTON', 'DROP_DOWN'].includes(fld.type)"
@@ -441,7 +441,7 @@
                 v-model="config.sync_deliveryLogApp.confirm_status"
                 class="form-val"
               >
-                <option value="" selected>----</option>
+                <option value="">----</option>
                 <template v-for="(fld, i) in fields_deliveryLogApp">
                   <option
                     v-if="['RADIO_BUTTON', 'DROP_DOWN'].includes(fld.type)"
@@ -466,7 +466,7 @@
                 v-model="config.sync_deliveryLogApp.customer_lineId"
                 class="form-val"
               >
-                <option value="" selected>----</option>
+                <option value="">----</option>
                 <template v-for="(fld, i) in fields_deliveryLogApp">
                   <option
                     v-if="['SINGLE_LINE_TEXT'].includes(fld.type)"
@@ -488,7 +488,7 @@
                 v-model="config.sync_deliveryLogApp.reception_date"
                 class="form-val"
               >
-                <option value="" selected>----</option>
+                <option value="">----</option>
                 <template v-for="(fld, i) in fields_deliveryLogApp">
                   <option
                     v-if="['DATE'].includes(fld.type)"
@@ -510,7 +510,7 @@
                 v-model="config.sync_deliveryLogApp.reception_time"
                 class="form-val"
               >
-                <option value="" selected>----</option>
+                <option value="">----</option>
                 <template v-for="(fld, i) in fields_deliveryLogApp">
                   <option
                     v-if="['TIME'].includes(fld.type)"
@@ -532,7 +532,7 @@
                 v-model="config.sync_deliveryLogApp.delivery_class"
                 class="form-val"
               >
-                <option value="" selected>----</option>
+                <option value="">----</option>
                 <template v-for="(fld, i) in fields_deliveryLogApp">
                   <option
                     v-if="['RADIO_BUTTON', 'DROP_DOWN'].includes(fld.type)"
@@ -557,7 +557,14 @@
                 v-model="config.sync_deliveryLogApp.manager_recId"
                 class="form-val"
               >
-                <option value="----" selected>----</option>
+                <option value="">----</option>
+                <template v-for="(fld, i) in fields_deliveryLogApp">
+                  <option
+                    v-if="['NUMBER'].includes(fld.type)"
+                    :key="i"
+                    :value="fld.code"
+                  >{{ fld.label }}</option>
+                </template>
               </select>
             </div>
           </div>
@@ -619,7 +626,7 @@
                 v-model="config.sync_fileLogApp.date"
                 class="form-val"
               >
-                <option value="" selected>----</option>
+                <option value="">----</option>
                   <template v-for="(fld, i) in fields_fileLogApp">
                     <option
                       v-if="['DATE'].includes(fld.type)"
@@ -641,7 +648,7 @@
                 v-model="config.sync_fileLogApp.time"
                 class="form-val"
               >
-                <option value="" selected>----</option>
+                <option value="">----</option>
                 <template v-for="(fld, i) in fields_fileLogApp">
                   <option
                     v-if="['TIME'].includes(fld.type)"
@@ -663,7 +670,7 @@
                 v-model="config.sync_fileLogApp.target"
                 class="form-val"
               >
-                <option value="" selected>----</option>
+                <option value="">----</option>
                 <template v-for="(fld, i) in fields_fileLogApp">
                   <option
                     v-if="['RADIO_BUTTON', 'DROP_DOWN'].includes(fld.type)"
@@ -685,7 +692,7 @@
                 v-model="config.sync_fileLogApp.file"
                 class="form-val"
               >
-                <option value="" selected>----</option>
+                <option value="">----</option>
                 <template v-for="(fld, i) in fields_fileLogApp">
                   <option
                     v-if="['FILE'].includes(fld.type)"
