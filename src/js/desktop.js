@@ -10,6 +10,7 @@
     spaceElement.innerHTML += '<vue-modal v-model="dialog" :config="config" ></vue-modal>';
 
     console.log(window);
+    Vue.use(window.VueQuillEditor)
     new Vue({
       el: '#vue-app',
       components: [
