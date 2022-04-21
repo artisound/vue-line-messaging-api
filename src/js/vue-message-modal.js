@@ -35,7 +35,7 @@ Vue.component('vue-modal', {
       return this.message.length;
     }
   },
-  mounted() {
+  mounted: async function() {
     this.config['file_upload_accept'] = [
       { label:'Office PowerPoint',  value:'.ppt,.pptx' },
       { label:'Office Word',        value:'.doc,.docx' },
@@ -49,6 +49,7 @@ Vue.component('vue-modal', {
     ];
     const config = this.config;
 
+    console.log(await this.get_records())
 
     if(config.msg_sect.length) {
       const primary_sect = config.msg_sect[0];
@@ -120,8 +121,12 @@ Vue.component('vue-modal', {
     },
 
     async get_records() {
-      const exec_url = 'https://timeconcier.jp/forline/tccom/v2/tcLibLINE/';
+      const event = this.kintoneEvent;
+      console.log(event);
 
+      if(event.type == 'app.record.index.show') {
+
+      } else if ('') {}
     },
     async sendLineMessage() {
       const messages = [];
@@ -162,7 +167,7 @@ Vue.component('vue-modal', {
     :before-close="handleClose"
   >
     <!-- タイミング指定 -->
-    <div>
+    <div class="my-3">
       <div>タイミング</div>
       <el-radio v-model="radio" label="今すぐ配信">今すぐ配信</el-radio>
     </div>
