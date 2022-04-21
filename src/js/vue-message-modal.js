@@ -36,7 +36,20 @@ Vue.component('vue-modal', {
     }
   },
   mounted() {
+    this.config['file_upload_accept'] = [
+      { label:'Office PowerPoint',  value:'.ppt,.pptx' },
+      { label:'Office Word',        value:'.doc,.docx' },
+      { label:'Office Excel',       value:'.xls,.xlsx' },
+      { label:'CSV',                value:'text/csv' },
+      { label:'テキスト',           value:'text/plain' },
+      { label:'PDF',                value:'application/pdf' },
+      { label:'音声',               value:'audio/*' },
+      { label:'動画',               value:'video/*' },
+      { label:'ZIP',                value:'application/zip' },
+    ];
     const config = this.config;
+
+
 
     if(config.msg_sect.length) {
       const primary_sect = config.msg_sect[0];
