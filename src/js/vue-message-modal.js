@@ -49,7 +49,7 @@ Vue.component('vue-modal', {
     ];
     const config = this.config;
 
-    console.log(await this.get_records())
+    await this.get_targets();
 
     if(config.msg_sect.length) {
       const primary_sect = config.msg_sect[0];
@@ -120,13 +120,25 @@ Vue.component('vue-modal', {
       this.$set(this.messages, msgNum, msgType);
     },
 
-    async get_records() {
+    async get_targets() {
+      console.group('get_targets()');
+      const client = new KintoneRestAPIClient();
       const event = this.kintoneEvent;
-      console.log(event);
+      console.log('kintoneEvent', event);
 
       if(event.type == 'app.record.index.show') {
-
-      } else if ('') {}
+        const query = kintone.app.getQueryCondition();
+        const records = await client.record.getAllRecords({
+          app: event.appId,
+          condition: query,
+        }).then(resp => { return resp; }).catch(console.error);
+        console.log('records', records);
+        if(records.length) return records;
+      } else if ('app.record.detail.show') {
+        console.log('record', event.record);
+        return event.record;
+      }
+      console.groupEnd();
     },
     async sendLineMessage() {
       const messages = [];
@@ -464,7 +476,10 @@ Vue.component('vue-modal', {
         type="primary"
         :disabled="messages.length < 5 ? false : true"
         @click="messages.push( objMsgType('TEXT') )"
-      >メッセージを追加</el-button>
+      >
+        <i class="fa-solid fa-plus me-1"></i>
+        メッセージを追加
+      </el-button>
     </div>
     <span slot="footer" class="dialog-footer">
       <el-button @click="$emit('change', false)">キャンセル</el-button>
