@@ -83,6 +83,7 @@ Vue.component('vue-modal', {
           obj['path']         = '';
           break;
         case 'RICHTEXT':
+          obj['title']    = '';
           obj['contents'] = '';
           break;
         case 'INFORMATION':
@@ -250,12 +251,11 @@ Vue.component('vue-modal', {
           limit="1"
           :show-file-list="false"
           :on-preview="msg.format.previewImageUrl"
-          :multiple="false"
           :http-request="async data => {
             const async_url = 'https://timeconcier.jp/forline/tccom/v2/tcLibFileUpload/';
             const fd        = new FormData();
             fd.append('files[0]', data.file);
-            fd.append('period', '1w');
+            fd.append('period', '1w');  // 1週間後 削除
 
             const uploaded_file = await axios.post(async_url, fd, {
               headers: { 'Content-Type': 'multipart/form-data' },
@@ -268,7 +268,7 @@ Vue.component('vue-modal', {
             if(uploaded_file.length) {
               $set(msg.format, 'originalContentUrl',  uploaded_file[0].url);
               $set(msg.format, 'previewImageUrl',     uploaded_file[0].url);
-              $set(msg, 'path', uploaded_file[0].path + uploaded_file[0].name);
+              $set(msg, 'path', uploaded_file[0].path);
             }
           }"
         >
@@ -313,19 +313,18 @@ Vue.component('vue-modal', {
 
       <template v-else-if="msg.sect == 'FILE'">
         <el-upload
-          v-if="!msg.format.previewImageUrl"
+          v-if="!msg.url"
           drag
           action="https://timeconcier.jp/forline/tccom/v2/tcLibFileUpload/"
-          accept=""
+          :accept="config.file_upload_accept"
           :limit="1"
           :show-file-list="false"
           :on-preview="msg.format.previewImageUrl"
-          :multiple="false"
-          :http-request="async (data) => {
+          :http-request="async data => {
             const async_url = 'https://timeconcier.jp/forline/tccom/v2/tcLibFileUpload/';
             const fd        = new FormData();
-            fd.append('file', data.file);
-            $set(msg, 'origin_name',  data.file.name);
+            fd.append('files[0]', data.file);
+            fd.append('period', '1w');  // 1週間後 削除
 
             const uploaded_file = await axios.post(async_url, fd, {
               headers: { 'Content-Type': 'multipart/form-data' },
@@ -335,14 +334,16 @@ Vue.component('vue-modal', {
               console.error(err)
             });
             console.log(uploaded_file)
-            if(uploaded_file.url) {
-              $set(msg, 'url',  uploaded_file.url);
-              $set(msg, 'name', uploaded_file.name);
-              $set(msg, 'path', uploaded_file.path + uploaded_file.name);
+            if(uploaded_file.length) {
+              $set(msg, 'url',          uploaded_file[0].url);
+              $set(msg, 'origin_name',  data.file.name);
+              $set(msg, 'name',         uploaded_file[0].name);
+              $set(msg, 'path',         uploaded_file[0].path);
             }
+            console.log(msg)
           }"
         >
-          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <i class="el-icon-upload"></i>
           <div class="el-upload__text">ドラッグまたは<em>クリック</em>でアップロード</div>
           <div class="el-upload__tip d-flex flex-column" slot="tip">
             <small style="line-height:initial;">※タイムコンシェル社にアップロードしたファイルURLを送信します。</small>
@@ -354,16 +355,11 @@ Vue.component('vue-modal', {
           :class="[
             'd-flex',
             'justify-content-center',
+            'mt-3',
           ]"
         >
-          <div class="position-relative">
-            <img
-              :src="msg.format.previewImageUrl"
-              :style="{
-                maxWidth: '200px',
-                display: 'block',
-              }"
-            >
+          <div class="position-relative d-flex flex-column">
+            <i class="text-center fa-regular fa-file fa-5x" style="color:#333;"></i>
             <el-button
               circle
               type="danger"
@@ -376,6 +372,7 @@ Vue.component('vue-modal', {
               ]"
               @click="delete_file(msg.sect, i)"
             ></el-button>
+            <span>{{msg.origin_name}}</span>
           </div>
         </div>
       </template>
