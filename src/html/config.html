@@ -1,115 +1,126 @@
-<div id="vue-app" class="topContainer" v-cloak>
-
+<div id="vue-app" class="border shadow rounded-3 mx-2 p-0" v-cloak>
 
   <!-------------------------------------------------------------------------->
   <!-- ボタン設定                                                           -->
   <!-------------------------------------------------------------------------->
-  <h3>ボタン設定</h3>
-  <div class="mb-5 d-flex flex-wrap gap-3">
+  <div class="p-4">
+    <h3 class="border-bottom py-2 px-3 shadow-sm mb-3" style="background-color:aliceblue;">ボタン設定</h3>
 
-    <div class="col-12 mb-0 ExplanationLabel">一括送信ボタンを表示する一覧ID</div>
-      <div class="col-3 d-flex flex-column">
-        <div class="kuc-label w-100">
-          一覧設定
-          <span class="kuc-require">*</span>
+    <div class="d-flex flex-column gap-3">
+      <div class="border-start border-5 border-info py-1 px-2 mt-2">一括送信ボタンを表示する一覧ID</div>
+      <div class="d-flex flex-wrap gap-3">
+        <div class="">
+          <div class="kuc-label">
+            <span>一覧設定</span>
+            <span class="kuc-require">*</span>
+          </div>
+
+          <div class="simpleSel ssel1">
+            <select
+              required
+              class="form-val"
+              v-model="config.btn_views"
+            >
+              <option value="">全ての一覧に表示</option>
+              <option
+                v-for="(view, i) in views"
+                :key="i"
+                :value="view.id"
+              >{{ view.name }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="border-start border-5 border-info py-1 px-2 mt-2">レコード編集・詳細画面に表示する「LINEメッセージ送信ボタン」についての情報</div>
+      <div class="d-flex flex-wrap gap-3">
+        <div class="">
+          <div class="kuc-label">
+            <span>ボタン名</span>
+            <span class="kuc-require">*</span>
+          </div>
+
+          <input
+            class="form-val kuc-input-text"
+            type="text"
+            v-model="config.btn_name"
+          >
         </div>
 
-        <span class="simpleSel ssel1">
-          <select
-            required
-            class="form-val"
-            v-model="config.btn_views"
-          >
-            <option value="">全ての一覧に表示</option>
-            <option
-              v-for="(view, i) in views"
-              :key="i"
-              :value="view.id"
-            >{{ view.name }}</option>
-          </select>
-        </span>
-    </div>
+        <div class="">
+          <div class="kuc-label">
+            ボタンスペースID<span class="kuc-require">*</span>
+          </div>
 
-    <div class="col-12 mb-0 ExplanationLabel">レコード編集・詳細画面に表示する「LINEメッセージ送信ボタン」についての情報</div>
-    <div class="col-3 d-flex flex-column">
-      <div class="kuc-label">
-        ボタン名<span class="kuc-require">*</span>
+          <div class="simpleSel ssel1">
+            <select
+              required
+              class="form-val"
+              v-model="config.btn_spaceId"
+            >
+              <option value="">----</option>
+              <option
+                v-for="(spc, i) in spaces"
+                :key="i"
+                :value="spc"
+              >{{ spc }}</option>
+            </select>
+          </div>
+        </div>
       </div>
 
-      <input
-        class="form-val kuc-input-text"
-        type="text"
-        v-model="config.btn_name"
-      >
     </div>
-    <div class="col-3 d-flex flex-column">
-      <div class="kuc-label">
-        ボタンスペースID<span class="kuc-require">*</span>
-      </div>
-
-      <div class="simpleSel ssel1">
-        <select
-          required
-          class="form-val"
-          v-model="config.btn_spaceId"
-        >
-          <option value="">----</option>
-          <option
-            v-for="(spc, i) in spaces"
-            :key="i"
-            :value="spc"
-          >{{ spc }}</option>
-        </select>
-      </div>
-    </div>
-
   </div>
 
-
+  <hr>
 
   <!-------------------------------------------------------------------------->
   <!-- LINEメッセージ送信機能                                               -->
   <!-------------------------------------------------------------------------->
-  <h3>LINEメッセージ送信機能</h3>
-  <div class="mb-5 d-flex flex-wrap gap-3">
+  <div class="p-4">
+    <h3 class="border-bottom py-2 px-3 shadow-sm mb-3" style="background-color:aliceblue;">LINEメッセージ送信機能</h3>
 
-    <div class="col-12 mb-0 ExplanationLabel">使用するLINEメッセージ種別を選択</div>
+    <div class="d-flex flex-column gap-3">
+      <div class="border-start border-5 border-info py-1 px-2 mt-2">使用するLINEメッセージ種別を選択</div>
+      <div class="d-flex flex-wrap gap-3">
+        <div class="">
+          <div class="kuc-label">
+            <span>送信メッセージ種別</span>
+            <span class="kuc-require">*</span>
+          </div>
 
-    <div class="col-12 d-flex flex-column">
-      <div class="col-12 kuc-label">
-        <span>送信メッセージ種別</span>
-        <span class="kuc-require">*</span>
-      </div>
-
-      <div class="col-12 d-flex flex-wrap gap-1">
-        <div
-          v-for="(mc, i) in msg_classes"
-          class="checkbtn"
-        >
-          <label>
-            <input
-              v-model="config.msg_sect"
-              type="checkbox"
-              :value="mc.value"
+          <div class="d-flex flex-wrap gap-2">
+            <div
+              v-for="(mc, i) in msg_classes"
+              class="checkbtn"
             >
-            <span>
-              <i :class="mc.icon"></i>
-              <span>{{ mc.label }}</span>
-            </span>
-          </label>
+              <label>
+                <input
+                  v-model="config.msg_sect"
+                  type="checkbox"
+                  :value="mc.value"
+                >
+                <span>
+                  <i :class="mc.icon"></i>
+                  <span>{{ mc.label }}</span>
+                </span>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
 
-    <div class="col-12 mb-0 ExplanationLabel">メッセージの詳細設定</div>
-      <div class="col-12 d-flex flex-wrap gap-2">
+      <div class="border-start border-5 border-info py-1 px-2 mt-2">メッセージの詳細設定</div>
+      <div class="d-flex flex-wrap gap-3">
 
         <div class="col-2 d-flex flex-column py-2 px-3 rounded-3" style="background-color:#f0f0f0;">
-          <div class="col-12 kuc-label">
-            <span>一度のメッセージ数上限</span><span class="kuc-require">*</span>
+          <div class="kuc-label">
+            <span>一度のメッセージ数上限</span>
+            <span class="kuc-require">*</span>
           </div>
-          <div class="col-12 simpleSel ssel1">
+
+          <div class="simpleSel ssel1">
             <select
               required
               v-model="config.msg_max"
@@ -125,7 +136,10 @@
         </div>
 
         <div class="col-2 d-flex flex-column py-2 px-3 rounded-3" style="background-color:#f0f0f0;">
-          <div class="kuc-label"><span>使用するテキストオプション</span></div>
+          <div class="kuc-label">
+            <span>使用するテキストオプション</span>
+          </div>
+
           <span
             v-for="(opt, i) in msg_options"
             :key="i"
@@ -141,474 +155,551 @@
             <label :for="'chk-msg_option-'+i">{{ opt.label }}</label>
           </span>
         </div>
-    
+
         <div class="col-2 d-flex flex-column py-2 px-3 rounded-3" style="background-color:#f0f0f0;">
-          <div class="kuc-label"><span>返信を受付</span></div>
+          <div class="kuc-label">
+            <span>返信を受付</span>
+          </div>
+
           <span class="kuc-input-checkbox-item">
             <input
-              id="chk-msg_reply"
+              v-model="config.msg_reply"
               class="form-chk"
               type="checkbox"
-              v-model="config.msg_reply"
+              id="chk-msg_reply"
             >
             <label for="chk-msg_reply">受け付ける</label>
           </span>
         </div>
+
       </div>
     </div>
   </div>
+
+  <hr>
 
   <!-------------------------------------------------------------------------->
   <!-- 連携情報                                                             -->
   <!-------------------------------------------------------------------------->
-  <h3>連携情報</h3>
-  <div class="boxContainer">
-    <div class="ExplanationLabel">顧客管理系アプリ(このアプリ)</div>
-    <div class="box">
-      <div class="kuc-label"><span>レコード番号</span><span class="kuc-require">*</span></div>
+  <div class="p-4">
+    <h3 class="border-bottom py-2 px-3 shadow-sm mb-3" style="background-color:aliceblue;">連携情報</h3>
 
-      <div class="simpleSel ssel1">
-        <select
-          v-model="config.sync_thisApp.recId"
-          class="form-val"
-          required
-        >
-          <option value="">----</option>
-          <template v-for="(fld, i) in fields">
-            <option
-              v-if="['RECORD_NUMBER'].includes(fld.type)"
-              :key="i"
-              :value="fld.code"
-            >{{ fld.label }}</option>
-          </template>
-        </select>
-      </div>
-    </div>
+    <div class="d-flex flex-column gap-3">
+      <div class="border-start border-5 border-info py-1 px-2 mt-2">顧客管理系アプリ(このアプリ)</div>
+      <div class="d-flex flex-wrap gap-3">
+        <div class="">
+          <div class="kuc-label">
+            <span>レコード番号</span>
+            <span class="kuc-require">*</span>
+          </div>
 
-    <div class="box">
-      <div class="kuc-label"><span>顧客名</span><span class="kuc-require">*</span></div>
+          <div class="simpleSel ssel1">
+            <select
+              v-model="config.sync_thisApp.recId"
+              class="form-val"
+              required
+            >
+              <option value="">----</option>
+              <template v-for="(fld, i) in fields">
+                <option
+                  v-if="['RECORD_NUMBER'].includes(fld.type)"
+                  :key="i"
+                  :value="fld.code"
+                >{{ fld.label }}</option>
+              </template>
+            </select>
+          </div>
+        </div>
 
-      <div class="simpleSel ssel1">
-        <select
-          v-model="config.sync_thisApp.customer_name"
-          class="form-val"
-          required
-        >
-          <option value="">----</option>
-          <template v-for="(fld, i) in fields">
-            <option
-              v-if="['SINGLE_LINE_TEXT'].includes(fld.type)"
-              :key="i"
-              :value="fld.code"
-            >{{ fld.label }}</option>
-          </template>
-        </select>
-      </div>
-    </div>
+        <div class="">
+          <div class="kuc-label">
+            <span>顧客名</span>
+            <span class="kuc-require">*</span>
+          </div>
 
-    <div class="box">
-      <div class="kuc-label"><span>LINEユーザーID</span><span class="kuc-require">*</span></div>
+          <div class="simpleSel ssel1">
+            <select
+              v-model="config.sync_thisApp.customer_name"
+              class="form-val"
+              required
+            >
+              <option value="">----</option>
+              <template v-for="(fld, i) in fields">
+                <option
+                  v-if="['SINGLE_LINE_TEXT'].includes(fld.type)"
+                  :key="i"
+                  :value="fld.code"
+                >{{ fld.label }}</option>
+              </template>
+            </select>
+          </div>
+        </div>
 
-      <div class="simpleSel ssel1">
-        <select
-          v-model="config.sync_thisApp.lineId"
-          class="form-val"
-          required
-        >
-          <option value="">----</option>
-          <template v-for="(fld, i) in fields">
-            <option
-              v-if="['SINGLE_LINE_TEXT'].includes(fld.type)"
-              :key="i"
-              :value="fld.code"
-            >{{ fld.label }}</option>
-          </template>
-        </select>
-      </div>
-    </div>
+        <div class="">
+          <div class="kuc-label">
+            <span>LINEユーザーID</span>
+            <span class="kuc-require">*</span>
+          </div>
 
-    <div class="box">
-      <div class="kuc-label"><span>担当者レコード番号</span></div>
+          <div class="simpleSel ssel1">
+            <select
+              v-model="config.sync_thisApp.lineId"
+              class="form-val"
+              required
+            >
+              <option value="">----</option>
+              <template v-for="(fld, i) in fields">
+                <option
+                  v-if="['SINGLE_LINE_TEXT'].includes(fld.type)"
+                  :key="i"
+                  :value="fld.code"
+                >{{ fld.label }}</option>
+              </template>
+            </select>
+          </div>
+        </div>
 
-      <div class="simpleSel ssel1">
-        <select
-          v-model="config.sync_thisApp.manager_recId"
-          class="form-val"
-        >
-          <option value="">----</option>
-          <template v-for="(fld, i) in fields">
-            <option
-              v-if="['NUMBER'].includes(fld.type)"
-              :key="i"
-              :value="fld.code"
-            >{{ fld.label }}</option>
-          </template>
-        </select>
-      </div>
-    </div>
-  </div>
-  <div class="boxContainer">
+        <div class="">
+          <div class="kuc-label">
+            <span>担当者レコード番号</span>
+          </div>
 
-    <div class="ExplanationLabel">送受信管理系アプリ</div>
-
-    <div class="box">
-      <div class="kuc-label"><span>アプリ番号</span><span class="kuc-require">*</span></div>
-      <input
-        v-model="config.sync_deliveryLogAppId"
-        class="form-val kuc-input-text inputNum"
-        type="number"
-        placeholder=""
-        style="width:128px;"
-      >
-    </div>
-    <div class="box">
-      <button
-        @click="get_formFields(config.sync_deliveryLogAppId, 'fields_deliveryLogApp')"
-        class="kuc-btn normal btn-margin"
-      >フォーム情報取得</button>
-    </div>
-  </div>
-
-  <fieldset style="width: 80%; margin: 0 40px; border-color: gainsboro;">
-    <div class="boxContainer">
-      <div>標準設定</div>
-      <div>　顧客レコード番号　：[宛先検索ルックアップ(先方)]ルックアップ</div>
-      <div>　担当者レコード番号：[宛先検索ルックアップ(当方)]ルックアップ</div>
-
-      <div class="box">
-        <div class="kuc-label"><span>顧客レコード番号</span><span class="kuc-require">*</span></div>
-
-        <div class="simpleSel ssel1">
-          <select
-            v-model="config.sync_deliveryLogApp.customer_recId"
-            class="form-val"
-            required
-          >
-            <option value="" selected>----</option>
-            <template v-for="(fld, i) in fields_deliveryLogApp">
-              <option
-                v-if="['NUMBER'].includes(fld.type)"
-                :key="i"
-                :value="fld.code"
-              >{{ fld.label }}</option>
-            </template>
-          </select>
+          <div class="simpleSel ssel1">
+            <select
+              v-model="config.sync_thisApp.manager_recId"
+              class="form-val"
+            >
+              <option value="">----</option>
+              <template v-for="(fld, i) in fields">
+                <option
+                  v-if="['NUMBER'].includes(fld.type)"
+                  :key="i"
+                  :value="fld.code"
+                >{{ fld.label }}</option>
+              </template>
+            </select>
+          </div>
         </div>
       </div>
 
-      <div class="box">
-        <div class="kuc-label"><span>メッセージ内容</span><span class="kuc-require">*</span></div>
-
-        <div class="simpleSel ssel1">
-          <select
-            v-model="config.sync_deliveryLogApp.message_content"
-            class="form-val"
-            required
-          >
-            <option value="" selected>----</option>
-            <template v-for="(fld, i) in fields_deliveryLogApp">
-              <option
-                v-if="['SINGLE_LINE_TEXT', 'MULTI_LINE_TEXT'].includes(fld.type)"
-                :key="i"
-                :value="fld.code"
-              >{{ fld.label }}</option>
-            </template>
-          </select>
-        </div>
-      </div>
-
-      <div class="box">
-        <div class="kuc-label"><span>お知らせタイトル</span></div>
-
-        <div class="simpleSel ssel1">
-          <select
-            v-model="config.sync_deliveryLogApp.info_title"
-            class="form-val"
-          >
-            <option value="" selected>----</option>
-            <template v-for="(fld, i) in fields_deliveryLogApp">
-              <option
-                v-if="['SINGLE_LINE_TEXT'].includes(fld.type)"
-                :key="i"
-                :value="fld.code"
-              >{{ fld.label }}</option>
-            </template>
-          </select>
-        </div>
-      </div>
-
-      <div class="box">
-        <div class="kuc-label"><span>お知らせ本文</span><span class="kuc-require">*</span></div>
-
-        <div class="simpleSel ssel1">
-          <select
-            v-model="config.sync_deliveryLogApp.info_content"
-            class="form-val"
-            required
-          >
-            <option value="" selected>----</option>
-            <template v-for="(fld, i) in fields_deliveryLogApp">
-              <option
-                v-if="['SINGLE_LINE_TEXT', 'MULTI_LINE_TEXT'].includes(fld.type)"
-                :key="i"
-                :value="fld.code"
-              >{{ fld.label }}</option>
-            </template>
-          </select>
-        </div>
-      </div>
-
-      <div class="box">
-        <div class="kuc-label"><span>お知らせカテゴリ</span></div>
-
-        <div class="simpleSel ssel1">
-          <select
-            v-model="config.sync_deliveryLogApp.info_category"
-            class="form-val"
-          >
-            <option value="" selected>----</option>
-            <template v-for="(fld, i) in fields_deliveryLogApp">
-              <option
-                v-if="['RADIO_BUTTON', 'DROP_DOWN'].includes(fld.type)"
-                :key="i"
-                :value="fld.code"
-              >{{ fld.label }}</option>
-            </template>
-          </select>
-        </div>
-      </div>
-
-      <div class="box">
-        <div class="kuc-label"><span>確認状態</span></div>
-
-        <div class="simpleSel ssel1">
-          <select
-            v-model="config.sync_deliveryLogApp.confirm_status"
-            class="form-val"
-          >
-            <option value="" selected>----</option>
-            <template v-for="(fld, i) in fields_deliveryLogApp">
-              <option
-                v-if="['RADIO_BUTTON', 'DROP_DOWN'].includes(fld.type)"
-                :key="i"
-                :value="fld.code"
-              >{{ fld.label }}</option>
-            </template>
-          </select>
-        </div>
-      </div>
-    </div>
-
-
-    <div class="boxContainer">
-      <div class="box">
-        <div class="kuc-label"><span>LINEユーザーID(顧客)</span></div>
-
-        <div class="simpleSel ssel1">
-          <select
-            v-model="config.sync_deliveryLogApp.customer_lineId"
-            class="form-val"
-          >
-            <option value="" selected>----</option>
-            <template v-for="(fld, i) in fields_deliveryLogApp">
-              <option
-                v-if="['SINGLE_LINE_TEXT'].includes(fld.type)"
-                :key="i"
-                :value="fld.code"
-              >{{ fld.label }}</option>
-            </template>
-          </select>
-        </div>
-      </div>
-
-      <div class="box">
-        <div class="kuc-label"><span>受付日付</span></div>
-
-        <div class="simpleSel ssel1">
-          <select
-            v-model="config.sync_deliveryLogApp.reception_date"
-            class="form-val"
-          >
-            <option value="" selected>----</option>
-            <template v-for="(fld, i) in fields_deliveryLogApp">
-              <option
-                v-if="['DATE'].includes(fld.type)"
-                :key="i"
-                :value="fld.code"
-              >{{ fld.label }}</option>
-            </template>
-          </select>
-        </div>
-      </div>
-
-      <div class="box">
-        <div class="kuc-label"><span>受付時刻</span></div>
-
-        <div class="simpleSel ssel1">
-          <select
-            v-model="config.sync_deliveryLogApp.reception_time"
-            class="form-val"
-          >
-            <option value="" selected>----</option>
-            <template v-for="(fld, i) in fields_deliveryLogApp">
-              <option
-                v-if="['TIME'].includes(fld.type)"
-                :key="i"
-                :value="fld.code"
-              >{{ fld.label }}</option>
-            </template>
-          </select>
-        </div>
-      </div>
-
-      <div class="box">
-        <div class="kuc-label"><span>送信区分</span></div>
-
-        <div class="simpleSel ssel1">
-          <select
-            v-model="config.sync_deliveryLogApp.delivery_class"
-            class="form-val"
-          >
-            <option value="" selected>----</option>
-            <template v-for="(fld, i) in fields_deliveryLogApp">
-              <option
-                v-if="['RADIO_BUTTON', 'DROP_DOWN'].includes(fld.type)"
-                :key="i"
-                :value="fld.code"
-              >{{ fld.label }}</option>
-            </template>
-          </select>
-        </div>
-      </div>
-    </div>
-
-
-    <div class="boxContainer">
-      <div class="box">
-        <div class="kuc-label"><span>担当者レコード番号</span></div>
-
-        <div class="simpleSel ssel1">
-          <select
-            v-model="config.sync_deliveryLogApp.manager_recId"
-            class="form-val"
-          >
-            <option value="----" selected>----</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="box">
-        <div class="kuc-label"><span>受信時LINE通知</span></div>
-        <span class="kuc-input-checkbox-item">
+      <div class="border-start border-5 border-info py-1 px-2 mt-2">送受信管理系アプリ</div>
+      <div class="d-flex flex-wrap gap-3">
+        <div class="">
+          <div class="kuc-label">
+            <span>アプリ番号</span>
+            <span class="kuc-require">*</span>
+          </div>
           <input
-            v-model="config.sync_deliveryLogApp.line_notification"
-            id="chk-sync_deliveryLogApp-line_notification"
-            class="form-chk"
-            type="checkbox"
+            v-model="config.sync_deliveryLogAppId"
+            class="form-val kuc-input-text inputNum"
+            type="number"
+            placeholder=""
+            style="width:128px;"
           >
-          <label for="chk-sync_deliveryLogApp-line_notification">担当者に通知する</label>
-        </span>
+        </div>
+        <div class="">
+          <button
+            @click="get_formFields(config.sync_deliveryLogAppId, 'fields_deliveryLogApp')"
+            class="kuc-btn normal btn-margin"
+          >フォーム情報取得</button>
+        </div>
       </div>
-    </div>
-  </fieldset>
+
+      <div class="border p-3 d-flex flex-column gap-1">
+        <div class="d-flex flex-column">
+          <span>標準設定</span>
+          <span class="ms-3">顧客レコード番号　：[宛先検索ルックアップ(先方)]ルックアップ</span>
+          <span class="ms-3">担当者レコード番号：[宛先検索ルックアップ(当方)]ルックアップ</span>
+        </div>
+
+        <div class="d-flex flex-wrap gap-3">
+          <div class="">
+            <div class="kuc-label">
+              <span>顧客レコード番号</span>
+              <span class="kuc-require">*</span>
+            </div>
+
+            <div class="simpleSel ssel1">
+              <select
+                v-model="config.sync_deliveryLogApp.customer_recId"
+                class="form-val"
+                required
+              >
+                <option value="" selected>----</option>
+                <template v-for="(fld, i) in fields_deliveryLogApp">
+                  <option
+                    v-if="['NUMBER'].includes(fld.type)"
+                    :key="i"
+                    :value="fld.code"
+                  >{{ fld.label }}</option>
+                </template>
+              </select>
+            </div>
+          </div>
+
+          <div class="">
+            <div class="kuc-label">
+              <span>メッセージ内容</span>
+              <span class="kuc-require">*</span>
+            </div>
+
+            <div class="simpleSel ssel1">
+              <select
+                v-model="config.sync_deliveryLogApp.message_content"
+                class="form-val"
+                required
+              >
+                <option value="" selected>----</option>
+                <template v-for="(fld, i) in fields_deliveryLogApp">
+                  <option
+                    v-if="['SINGLE_LINE_TEXT', 'MULTI_LINE_TEXT'].includes(fld.type)"
+                    :key="i"
+                    :value="fld.code"
+                  >{{ fld.label }}</option>
+                </template>
+              </select>
+            </div>
+          </div>
+
+          <div class="">
+            <div class="kuc-label">
+              <span>お知らせタイトル</span>
+            </div>
+
+            <div class="simpleSel ssel1">
+              <select
+                v-model="config.sync_deliveryLogApp.info_title"
+                class="form-val"
+              >
+                <option value="" selected>----</option>
+                <template v-for="(fld, i) in fields_deliveryLogApp">
+                  <option
+                    v-if="['SINGLE_LINE_TEXT'].includes(fld.type)"
+                    :key="i"
+                    :value="fld.code"
+                  >{{ fld.label }}</option>
+                </template>
+              </select>
+            </div>
+          </div>
+
+          <div class="">
+            <div class="kuc-label">
+              <span>お知らせ本文</span>
+              <span class="kuc-require">*</span>
+            </div>
+
+            <div class="simpleSel ssel1">
+              <select
+                v-model="config.sync_deliveryLogApp.info_content"
+                class="form-val"
+                required
+              >
+                <option value="" selected>----</option>
+                <template v-for="(fld, i) in fields_deliveryLogApp">
+                  <option
+                    v-if="['SINGLE_LINE_TEXT', 'MULTI_LINE_TEXT'].includes(fld.type)"
+                    :key="i"
+                    :value="fld.code"
+                  >{{ fld.label }}</option>
+                </template>
+              </select>
+            </div>
+          </div>
+
+          <div class="">
+            <div class="kuc-label">
+              <span>お知らせカテゴリ</span>
+            </div>
+
+            <div class="simpleSel ssel1">
+              <select
+                v-model="config.sync_deliveryLogApp.info_category"
+                class="form-val"
+              >
+                <option value="" selected>----</option>
+                <template v-for="(fld, i) in fields_deliveryLogApp">
+                  <option
+                    v-if="['RADIO_BUTTON', 'DROP_DOWN'].includes(fld.type)"
+                    :key="i"
+                    :value="fld.code"
+                  >{{ fld.label }}</option>
+                </template>
+              </select>
+            </div>
+          </div>
+
+          <div class="">
+            <div class="kuc-label">
+              <span>確認状態</span>
+            </div>
+
+            <div class="simpleSel ssel1">
+              <select
+                v-model="config.sync_deliveryLogApp.confirm_status"
+                class="form-val"
+              >
+                <option value="" selected>----</option>
+                <template v-for="(fld, i) in fields_deliveryLogApp">
+                  <option
+                    v-if="['RADIO_BUTTON', 'DROP_DOWN'].includes(fld.type)"
+                    :key="i"
+                    :value="fld.code"
+                  >{{ fld.label }}</option>
+                </template>
+              </select>
+            </div>
+          </div>
+        </div>
 
 
-  <div class="boxContainer">
-    <div class="ExplanationLabel">配信ファイルログ系アプリ</div>
-    <div>「写真」「ファイル」で送信したファイルを記録するkintoneアプリ情報</div>
-    <div class="box">
-      <div class="kuc-label"><span style="">アプリ番号</span><span class="kuc-require">*</span></div>
-      <input
-        v-model="config.sync_fileLogAppId"
-        class="form-val kuc-input-text inputNum"
-        type="number"
-        placeholder=""
-        style="width:128px;"
-      >
+        <div class="d-flex flex-wrap gap-3">
+          <div class="">
+            <div class="kuc-label">
+              <span>LINEユーザーID(顧客)</span>
+            </div>
+
+            <div class="simpleSel ssel1">
+              <select
+                v-model="config.sync_deliveryLogApp.customer_lineId"
+                class="form-val"
+              >
+                <option value="" selected>----</option>
+                <template v-for="(fld, i) in fields_deliveryLogApp">
+                  <option
+                    v-if="['SINGLE_LINE_TEXT'].includes(fld.type)"
+                    :key="i"
+                    :value="fld.code"
+                  >{{ fld.label }}</option>
+                </template>
+              </select>
+            </div>
+          </div>
+
+          <div class="">
+            <div class="kuc-label">
+              <span>受付日付</span>
+            </div>
+
+            <div class="simpleSel ssel1">
+              <select
+                v-model="config.sync_deliveryLogApp.reception_date"
+                class="form-val"
+              >
+                <option value="" selected>----</option>
+                <template v-for="(fld, i) in fields_deliveryLogApp">
+                  <option
+                    v-if="['DATE'].includes(fld.type)"
+                    :key="i"
+                    :value="fld.code"
+                  >{{ fld.label }}</option>
+                </template>
+              </select>
+            </div>
+          </div>
+
+          <div class="">
+            <div class="kuc-label">
+              <span>受付時刻</span>
+            </div>
+
+            <div class="simpleSel ssel1">
+              <select
+                v-model="config.sync_deliveryLogApp.reception_time"
+                class="form-val"
+              >
+                <option value="" selected>----</option>
+                <template v-for="(fld, i) in fields_deliveryLogApp">
+                  <option
+                    v-if="['TIME'].includes(fld.type)"
+                    :key="i"
+                    :value="fld.code"
+                  >{{ fld.label }}</option>
+                </template>
+              </select>
+            </div>
+          </div>
+
+          <div class="">
+            <div class="kuc-label">
+              <span>送信区分</span>
+            </div>
+
+            <div class="simpleSel ssel1">
+              <select
+                v-model="config.sync_deliveryLogApp.delivery_class"
+                class="form-val"
+              >
+                <option value="" selected>----</option>
+                <template v-for="(fld, i) in fields_deliveryLogApp">
+                  <option
+                    v-if="['RADIO_BUTTON', 'DROP_DOWN'].includes(fld.type)"
+                    :key="i"
+                    :value="fld.code"
+                  >{{ fld.label }}</option>
+                </template>
+              </select>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="d-flex flex-wrap gap-3">
+          <div class="">
+            <div class="kuc-label">
+              <span>担当者レコード番号</span>
+            </div>
+
+            <div class="simpleSel ssel1">
+              <select
+                v-model="config.sync_deliveryLogApp.manager_recId"
+                class="form-val"
+              >
+                <option value="----" selected>----</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="">
+            <div class="kuc-label">
+              <span>受信時LINE通知</span>
+            </div>
+
+            <span class="kuc-input-checkbox-item">
+              <input
+                v-model="config.sync_deliveryLogApp.line_notification"
+                id="chk-sync_deliveryLogApp-line_notification"
+                class="form-chk"
+                type="checkbox"
+              >
+              <label for="chk-sync_deliveryLogApp-line_notification">担当者に通知する</label>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="border-start border-5 border-info py-1 px-2 mt-2">
+        配信ファイルログ系アプリ<br>
+        <small class="text-primary">「写真」「ファイル」で送信したファイルを記録するkintoneアプリ情報</small>
+      </div>
+      <div class="d-flex flex-wrap gap-3">
+        <div class="">
+          <div class="kuc-label">
+            <span>アプリ番号</span>
+            <span class="kuc-require">*</span>
+          </div>
+
+          <input
+            v-model="config.sync_fileLogAppId"
+            class="form-val kuc-input-text inputNum"
+            type="number"
+            placeholder=""
+            style="width:128px;"
+          >
+        </div>
+
+        <div class="mt-2 align-self-end d-flex flex-column">
+          <small class="d-block text-danger">※この辺りは、1kintone環境につき一か所でしか設定してはいけない</small>
+          <small class="d-block text-danger">※顧客管理に設定後、社員管理で設定したら後者で構成情報が上書きされるので対策必要(20210218未対応)</small>
+        </div>
+      </div>
+
+      <div class="border-start border-5 border-info py-1 px-2 mt-2">LINE公式アカウント関係</div>
+
+      <div class="d-flex flex-column gap-1">
+        <div class="d-flex flex-wrap gap-3">
+          <div class="">
+            <div class="kuc-label">
+              <span>チャネルシークレット</span>
+              <span class="kuc-require">*</span>
+            </div>
+            <input
+              v-model="config.sync_line.channel_secret"
+              class="form-val kuc-input-text"
+              type="text"
+              placeholder="例)60403~a2f5e"
+            >
+          </div>
+
+          <div class="">
+            <div class="kuc-label">
+              <span>チャネルアクセストークン</span>
+              <span class="kuc-require">*</span>
+            </div>
+            <input
+              v-model="config.sync_line.channel_token"
+              class="form-val kuc-input-text"
+              type="text"
+              placeholder="例)yPh/FotJkX4Aa/HaC ~ FU="
+            >
+          </div>
+
+          <div class="">
+            <div class="kuc-label">
+              <span>ボットのベーシックID</span>
+              <span class="kuc-require">*</span>
+            </div>
+            <input
+              v-model="config.sync_line.bot_id"
+              class="form-val kuc-input-text"
+              type="text"
+              placeholder="例)@123abcde"
+            >
+          </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-3">
+          <div class="">
+            <div class="kuc-label">
+              <span>受信BOXリッチメニューID(バッジ無し)</span>
+              <span class="kuc-require">*</span>
+            </div>
+            <input
+              v-model="config.sync_line.richmenuId_normal"
+              class="form-val kuc-input-text"
+              type="text"
+              placeholder=""
+              style="width:384px;"
+            >
+          </div>
+
+          <div class="">
+            <div class="kuc-label">
+              <span>受信BOXリッチメニューID(バッジ有り)</span>
+              <span class="kuc-require">*</span>
+            </div>
+            <input
+              v-model="config.sync_line.richmenuId_badged"
+              class="form-val kuc-input-text"
+              type="text"
+              placeholder=""
+              style="width:384px;"
+            >
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex flex-column">
+        <span>受信BOXに表示されるカテゴリ別のアイコン設定</span>
+        <span>「カテゴリ1」のように入力すると、その文字のカテゴリボタンが表示されます。</span>
+        <span>「<i class="fa-solid fa-circle-exclamation"></i>」のようにタグ入力も可能。</span>
+        <span>※これらの情報はプラグイン側では使用せず、本設定画面保存時にサーバー側にカテゴリ構成ファイルとして保存されます</span>
+      </div>
     </div>
   </div>
 
+  <hr>
 
-  <div class="boxContainer">
-    <div>※この辺りは、1kintone環境につき一か所でしか設定してはいけない</div>
-    <div>※顧客管理に設定後、社員管理で設定したら後者で構成情報が上書きされるので対策必要(20210218未対応)</div>
-    <div class="ExplanationLabel">LINE公式アカウント関係</div>
-
-    <div class="boxContainer">
-      <div class="box">
-        <div class="kuc-label"><span>チャネルシークレット</span><span class="kuc-require">*</span></div>
-        <input
-          v-model="config.sync_line.channel_secret"
-          class="form-val kuc-input-text"
-          type="text"
-          placeholder="例)60403~a2f5e"
-        >
-      </div>
-
-      <div class="box">
-        <div class="kuc-label"><span>チャネルアクセストークン</span><span class="kuc-require">*</span></div>
-        <input
-          v-model="config.sync_line.channel_token"
-          class="form-val kuc-input-text"
-          type="text"
-          placeholder="例)yPh/FotJkX4Aa/HaC ~ FU="
-        >
-      </div>
-
-      <div class="box">
-        <div class="kuc-label"><span>ボットのベーシックID</span><span class="kuc-require">*</span></div>
-        <input
-          v-model="config.sync_line.bot_id"
-          class="form-val kuc-input-text"
-          type="text"
-          placeholder="例)@123abcde"
-        >
-      </div>
+  <div class="p-4">
+    <div class="d-flex gap-3">
+      <button
+        @click="history.back()"
+        class="kuc-btn normal"
+      >キャンセル</button>
+      <button
+        @click="save_config"
+        class="kuc-btn submit"
+      >保存</button>
     </div>
-    <div class="boxContainer">
-      <div class="box">
-        <div class="kuc-label"><span style="">受信BOXリッチメニューID(バッジ無し)</span><span class="kuc-require">*</span></div>
-        <input
-          v-model="config.sync_line.richmenuId_normal"
-          class="form-val kuc-input-text"
-          type="text"
-          placeholder=""
-          style="width:384px;"
-        >
-      </div>
-
-      <div class="box">
-        <div class="kuc-label"><span style="">受信BOXリッチメニューID(バッジ有り)</span><span class="kuc-require">*</span></div>
-        <input
-          v-model="config.sync_line.richmenuId_badged"
-          class="form-val kuc-input-text"
-          type="text"
-          placeholder=""
-          style="width:384px;"
-        >
-      </div>
-    </div>
-
-  </div>
-  <div class="boxContainer">
-    <div>受信BOXに表示されるカテゴリ別のアイコン設定</div>
-    <div>「カテゴリ1」のように入力すると、その文字のカテゴリボタンが表示されます。</div>
-    <div>「<i class="fa-solid fa-circle-exclamation"></i>」のようにタグ入力も可能。</div>
-    <div>※これらの情報はプラグイン側では使用せず、本設定画面保存時にサーバー側にカテゴリ構成ファイルとして保存されます</div>
-    <div id="setCategoryIcons"></div>
-  </div>
-
-  
-  <div class="block" style="display:flex;">
-    <button
-      @click="history.back()"
-      class="kuc-btn normal"
-      style="margin:12px;"
-    >キャンセル</button>
-    <button
-      @click="save_config"
-      class="kuc-btn submit"
-      style="margin:12px;"
-    >保存</button>
   </div>
 </div>
