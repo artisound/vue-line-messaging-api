@@ -1,3 +1,4 @@
+const date = new Date();
 Vue.component('vue-modal', {
   model: {
     prop: 'dialog',
@@ -27,7 +28,7 @@ Vue.component('vue-modal', {
         this.messages = [];
         this.messages.push(this.objMsgType('TEXT'));
       }
-    }
+    },
   },
   computed: {
     toggleDialog: {
@@ -43,6 +44,7 @@ Vue.component('vue-modal', {
     }
   },
   mounted: async function() {
+    const client = new KintoneRestAPIClient(); // kintone Rest API Client
     this.config['file_upload_accept'] = [
       { label:'Office PowerPoint',  value:'.ppt,.pptx' },
       { label:'Office Word',        value:'.doc,.docx' },
@@ -55,17 +57,35 @@ Vue.component('vue-modal', {
       { label:'ZIP',                value:'application/zip' },
     ];
     const config = this.config;
-
-    await this.get_targets();
-
     if(config.msg_sect.length) {
       const primary_sect = config.msg_sect[0];
       this.messages.push(this.objMsgType(primary_sect));
     }
+
+    const ts = date.getTime();
+    console.log(dayjs(ts).format('YYYY-MM-DD HH:mm:ss'));
   },
   methods: {
     handleClose() {
       return;
+    },
+
+    get_max_min_byArray(array, max_or_min = 'max') {
+      const aryMax = (a, b) => { return Math.max(Number(a), Number(b)); };
+      const aryMin = (a, b) => { return Math.min(Number(a), Number(b)); };
+      return (max_or_min == 'max') ? array.reduce(aryMax) : array.reduce(aryMin);
+    },
+
+    change_replyToDisable() {
+      if(this.messages.length > 1) {
+        this.messages.forEach(msg => {
+          console.log(msg)
+          if (msg.sect == 'TEXT') {
+            this.$set(msg, 'reply', false);
+            this.$set(msg, 'format', this.objMsgType(msg.sect));
+          }
+        });
+      }
     },
 
     /** ******************************************************************************************************
@@ -100,6 +120,8 @@ Vue.component('vue-modal', {
           obj['format'] = { type: 'image', originalContentUrl: '', previewImageUrl: '' };
           obj['dialog'] = false;
           obj['path']   = '';
+          obj['base64'] = '';
+          obj['origin_name']  = '';
           break;
         case 'FILE':
           obj['format'] = {
@@ -108,14 +130,15 @@ Vue.component('vue-modal', {
             template: {
               type: 'buttons',
               title: '',    // ファイル名
-              text: '※個のファイルは１週間後に削除されます。',
+              text: '※ファイルURLは1週間有効です。\n(' + dayjs().add(1, 'week').format('YYYY/MM/DD') + ')',
               actions: [{ 'label': 'ダウンロード', 'type': 'uri', 'uri': '' }]
             }
           };
-          obj['url']          = '';
+          obj['url']    = '';
+          obj['name']   = '';
+          obj['path']   = '';
+          obj['base64'] = '';
           obj['origin_name']  = '';
-          obj['name']         = '';
-          obj['path']         = '';
           break;
         case 'RICHTEXT':
           obj['title']    = '';
@@ -128,25 +151,42 @@ Vue.component('vue-modal', {
       return obj;
     },
 
+    /** ******************************************************************************************************
+     * メッセージ送信先の顧客レコードを取得
+     ****************************************************************************************************** */
     async get_targets() {
       console.group('get_targets()');
-      const client = new KintoneRestAPIClient();
-      const event = this.kintoneEvent;
-      console.log('kintoneEvent', event);
+      // kintone Rest API Client
+      const client  = new KintoneRestAPIClient();
+      const event   = this.kintoneEvent;
 
-      if(event.type == 'app.record.index.show') {
+      const records = [];
+      if (event.type.includes('index')) {
+        /** ***************************************************
+         * 一覧画面から取得
+         *************************************************** */
+        // クエリ文字列
         const query = kintone.app.getQueryCondition();
-        const records = await client.record.getAllRecords({
+
+        // 複数レコード取得
+        await client.record.getAllRecords({
           app: event.appId,
           condition: query,
-        }).then(resp => { return resp; }).catch(console.error);
-        console.log('records', records);
-        if(records.length) return records;
-      } else if ('app.record.detail.show') {
+        }).then(resp => {
+          // 取得したレコードを格納
+          resp.forEach(rec => records.push(rec));
+        }).catch(console.error);
+      } else if (event.type.includes('detail')) {
+        /** ***************************************************
+         * 詳細画面（顧客レコード）から取得
+         *************************************************** */
         console.log('record', event.record);
-        return event.record;
+        // 現在のレコード情報を格納
+        records.push(event.record);
       }
-      console.groupEnd();
+      console.log('records', records);
+      console.groupEnd('get_targets()');
+      return records;
     },
 
     async get_manager(appId, recId) {
@@ -158,7 +198,10 @@ Vue.component('vue-modal', {
      ****************************************************************************************************** */
     async send_lineMessage() {
       console.group('send_lineMessage()');
-      const config = this.config;
+      const client    = new KintoneRestAPIClient(); // kintone Rest API Client
+      const timestamp = date.getTime();     // 現在時刻タイムスタンプ
+      const config    = this.config;        // 設定情報
+      const event     = this.kintoneEvent;  // kintoneイベント情報
       const confirm = await this.$confirm(
         '該当のお客様にメッセージを送信します。<br>送信後は取り消すことができません。<br>よろしいですか？', // メッセージボディ
         '確認', // ヘッダータイトル
@@ -209,22 +252,13 @@ Vue.component('vue-modal', {
        *************************************************** */
       const targets = await this.get_targets();
       const lineIds = [];
-      if(targets) {
-        if(Array.isArray(targets) && targets.length) {
-          // 一覧画面から取得
-          targets.forEach(tg => {
-            if(config.sync_thisApp.lineId) {
-              const lineId = tg[config.sync_thisApp.lineId].value;
-              if(lineId) lineIds.push(lineId);
-            }
-          })
-        } else {
-          // 詳細画面から取得
+      if (targets && targets.length) {
+        targets.forEach(tg => {
           if(config.sync_thisApp.lineId) {
-            const lineId = targets[config.sync_thisApp.lineId].value;
+            const lineId = tg[config.sync_thisApp.lineId].value;
             if(lineId) lineIds.push(lineId);
           }
-        }
+        })
       }
       // 対象者なし
       if(!lineIds.length) {
@@ -238,24 +272,205 @@ Vue.component('vue-modal', {
       /** ***************************************************
        * LINE メッセージ送信
        *************************************************** */
-      const exec_url = 'https://timeconcier.jp/forline/tccom/v2/tcLibLINE/';
-      const send_msg = await axios.post(exec_url, {
-        accessToken: config.sync_line.channel_token,
-        action: 'multicastMessage',
-        data: {
-          to      : lineIds,
-          messages: messages,
-        }
-      }).then(resp => {
-        console.log(resp);
-        return (resp.data && !Object.keys(resp.data).length) ? true : false;
-      }).catch(console.error)
+        // const exec_url = 'https://timeconcier.jp/forline/tccom/v2/tcLibLINE/';
+        // const send_msg = await axios.post(exec_url, {
+        //   accessToken: config.sync_line.channel_token,
+        //   action: 'multicastMessage',
+        //   data: {
+        //     to      : lineIds,
+        //     messages: messages,
+        //   }
+        // }).then(resp => {
+        //   console.log(resp);
+        //   return (resp.data && !Object.keys(resp.data).length) ? true : false;
+        // }).catch(console.error)
 
-      if(!send_msg) {
-        this.$message({
-          type: 'error',
-          message: 'メッセージの送信に失敗しました。'
+        // if(!send_msg) {
+        //   this.$message({
+        //     type: 'error',
+        //     message: 'メッセージの送信に失敗しました。'
+        //   });
+        // }
+
+
+      /** ***************************************************
+       * 送受信管理へ追加・メッセージ送信
+       *************************************************** */
+      if (config.sync_deliveryLogAppId) {
+        const thisApp = config.sync_thisApp;
+        const deliveryLogApp = config.sync_deliveryLogApp;
+        const messageId = event.type.includes('index') ? `${timestamp}-bunch-${kintone.getLoginUser().id}` : `${timestamp}-unit-${lineIds[0]}`;
+
+        const log_record_params = [];
+        targets.forEach((tg, i) => {
+          const rec_prm = {
+            'メッセージ区分': { value: '送信' },
+            '連絡手段'      : { value: 'LINE' },
+            '送信対象'      : { value: event.type.includes('index') ? '一括' : '個別' },
+            'メッセージID'  : { value: messageId },
+          };
+
+          rec_prm[deliveryLogApp.customer_recId] = { value: lineId };
+          if (thisApp.manager_recId) rec_prm[thisApp.manager_recId] = { value: tg[thisApp.manager_recId].value };
+
+          // メッセージが1件のみの場合
+          if (messages.length == 1) {
+            const msg0 = this.messages[0];
+
+            rec_prm['返信受付'] = { value: msg0.reply ? 'あり' : 'なし' };
+            if (msg0.sect == 'TEXT') {
+              rec_prm[deliveryLogApp.message_content] = { value: msg0.reply ? messages[0].template.text : messages[0].text };
+            } else {
+              rec_prm[deliveryLogApp.message_content] = { value: this.objContents.find(v => v.value == msg0.sect).value };
+            }
+          }
+          log_record_params.push(rec_prm)
         });
+
+        /** ***************************************************
+         * ユーザー数に応じて処理切り分け
+         *************************************************** */
+        if (log_record_params.length) {
+          if (log_record_params.length > 1) {
+            // ----------------------------
+            // 一括追加
+            // ----------------------------
+            // レコード追加
+            const addRecords = await client.record.addAllRecords({
+              app    : config.sync_deliveryLogAppId,
+              records: log_record_params,
+            }).then(resp => { return resp.records; }).catch(console.error);
+            console.log('addAllRecords', addRecords);
+            if (!addRecords) return;
+
+            const recIds = this.objectToArrayByKey(addRecords, 'id');
+            const minId = this.get_max_min_byArray(recIds, 'min');  // レコード番号MIN
+            const maxId = this.get_max_min_byArray(recIds, 'max');  // レコード番号MAX
+
+            // 追加したレコードを取得
+            const getRecords = await client.record.getAllRecords({
+              app      : config.sync_deliveryLogAppId,
+              condition: `$id >= ${minId} and $id <= ${maxId}`
+            }).then(async resp => { return resp; }).catch(console.error);
+
+
+            const ngIds = [];
+            for (const rec of getRecords) {
+              const lineId = rec[deliveryLogApp.customer_lineId].value
+              if (lineId && messages.length) {
+                // LINE メッセージ送信
+                const send = await axios.post(exec_url, {
+                  accessToken: config.sync_line.channel_token,
+                  action: 'pushMessage',
+                  data: { to: lineId, messages: messages },
+                })
+
+                if (send.data && !Object.keys(send.data).length) {
+                  // 成功
+                  console.log('send', rec.$id.value + ' - OK');
+                } else {
+                  // 失敗
+                  console.log('send', rec.$id.value + ' - NG');
+                  ngIds.push(rec.$id.value);
+                }
+              }
+            }
+
+            if (ngIds.length) {
+              const ngRecs = [];
+              ngIds.forEach(rec_id => {
+                ngRecs.push({
+                  id: rec_id,
+                  record: { メッセージ区分: { value: '－' } }
+                });
+              });
+
+              // メッセージ区分 書き換え
+              await client.record.updateRecords({
+                app: config.sync_deliveryLogAppId,
+                records: ngRecs,
+              });
+            }
+
+          } else {
+            // ----------------------------
+            // 単一追加
+            // ----------------------------
+            // レコード追加
+            const addRecord = await client.record.addRecord({
+              app   : config.sync_deliveryLogAppId,
+              record: log_record_params[0],
+            });
+            if (!addRecord) return;
+
+
+            // 追加したレコードを取得
+            const getRecord = await client.record.getRecord({
+              app : config.sync_deliveryLogAppId,
+              id  : addRecord.id
+            })
+            if (!getRecord) return;
+            const rec = getRecord.record
+
+            if (messages.length == 1 && this.messages[0].reply) {
+              const format = this.messages[0].format;
+              this.$set(format.template.actions[0], 'uri', `https://liff.line.me/${config.sync_liff.reply}?dest=0&msgid=${messageId}`)
+            }
+
+
+            // LINE メッセージ送信
+            const lineId = rec[deliveryLogApp.customer_lineId].value
+            const send   = await axios.post(exec_url, {
+              accessToken: config.sync_line.channel_token,
+              action: 'pushMessage',
+              data: { to: lineId, messages: messages },
+            });
+
+
+            // LINE メッセージ送信結果
+            if (send.data && !Object.keys(send.data).length) {
+              // 成功
+              console.log('send', rec.$id.value + ' - OK');
+            } else {
+              // 失敗
+              console.log('send', rec.$id.value + ' - NG');
+
+              // メッセージ区分 書き換え
+              await client.record.updateRecord({
+                app: config.sync_deliveryLogAppId,
+                id: rec.$id.value,
+                record: { メッセージ区分: { value: '－' } },
+              });
+            }
+          }
+        }
+
+        /** ***************************************************
+         * ファイルログ
+         *************************************************** */
+        if (config.sync_fileLogAppId) {
+          const fileLogApp = config.sync_fileLogApp;
+          const uploadFile = await client.file.uploadFile({
+            file: {
+              name: data.file.name,
+              data: msg.base64,
+            }
+          })
+          if(!uploadFile) return;
+
+
+          const log_record_params = {};
+          if (fileLogApp.date)   log_record_params[fileLogApp.date]   = dayjs(timestamp).format('YYYY-MM-DD');
+          if (fileLogApp.time)   log_record_params[fileLogApp.time]   = dayjs(timestamp).format('HH:mm');
+          if (fileLogApp.file)   log_record_params[fileLogApp.file]   = uploadFile.fileKey;
+          if (fileLogApp.target) log_record_params[fileLogApp.target] = event.type.includes('index') ? '一括' : '個別';
+
+          const addRecord = await client.addRecord({
+            app: config.sync_fileLogAppId,
+            record: log_record_params,
+          })
+          console.log(addRecord);
+        }
       }
 
       this.$message({
@@ -265,7 +480,7 @@ Vue.component('vue-modal', {
 
       // // ダイアログを閉じる
       // this.$emit('change', false);
-      console.groupEnd();
+      console.groupEnd('send_lineMessage()');
     },
 
     /** ******************************************************************************************************
@@ -332,7 +547,7 @@ Vue.component('vue-modal', {
           ><i class="fa-solid fa-eraser"></i></el-button>
           <el-button
             :disabled="messages.length == 1 ? true : false"
-            @click="messages.splice(i, 1);"
+            @click="messages.splice(i, 1);change_replyToDisable();"
           ><i class="fa-solid fa-xmark"></i></el-button>
         </el-button-group>
       </div>
@@ -361,8 +576,9 @@ Vue.component('vue-modal', {
             <el-button v-if="config.msg_option.template">テンプレート</el-button>
             <el-button v-if="config.msg_option.embed_char">埋め込み文字</el-button>
             <el-checkbox
-              v-if="config.msg_reply"
+              v-if="kintoneEvent.type.includes('detail') && config.msg_reply"
               v-model="msg.reply"
+              :disabled="messages.length > 1 ? true : false"
               @change="() => {
                 let format;
                 if(msg.reply) {
@@ -473,9 +689,17 @@ Vue.component('vue-modal', {
             });
             console.log(uploaded_file)
             if(uploaded_file.length) {
+              const reader = new FileReader();
+              reader.onload = () => {
+                console.log( reader.result );
+                $set(msg, 'base64', reader.result);
+              }
+              reader.readAsDataURL(data.file);
+
               $set(msg.format, 'originalContentUrl',  uploaded_file[0].url);
               $set(msg.format, 'previewImageUrl',     uploaded_file[0].url);
               $set(msg, 'path', uploaded_file[0].path);
+              $set(msg, 'origin_name',  data.file.name);
             }
           }"
         >
@@ -541,6 +765,13 @@ Vue.component('vue-modal', {
             });
             console.log(uploaded_file)
             if(uploaded_file.length) {
+              const reader = new FileReader();
+              reader.onload = () => {
+                console.log( reader.result );
+                $set(msg, 'base64', reader.result);
+              }
+              reader.readAsDataURL(data.file);
+
               // メッセージテンプレート
               $set(msg.format,                      'altText',  data.file.name);
               $set(msg.format.template,             'title',    data.file.name);
@@ -621,7 +852,7 @@ Vue.component('vue-modal', {
       <el-button
         type="primary"
         :disabled="messages.length < config.msg_max ? false : true"
-        @click="messages.push( objMsgType('TEXT') )"
+        @click="messages.push( objMsgType('TEXT') );change_replyToDisable();"
       >
         <i class="fa-solid fa-plus me-1"></i>
         メッセージを追加
