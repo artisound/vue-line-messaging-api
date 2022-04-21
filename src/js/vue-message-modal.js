@@ -50,7 +50,6 @@ Vue.component('vue-modal', {
     const config = this.config;
 
 
-
     if(config.msg_sect.length) {
       const primary_sect = config.msg_sect[0];
       this.messages.push(this.objMsgType(primary_sect));
@@ -59,6 +58,14 @@ Vue.component('vue-modal', {
   methods: {
     handleClose() {
       return;
+    },
+
+    objectToArrayByKey(object, key) {
+      const ret_arr = [];
+      if(Array.isArray(object)) {
+        object.forEach( (obj, i) => ret_arr.push(obj[key]) );
+      }
+      return ret_arr;
     },
 
     objMsgType(sect) {
@@ -76,7 +83,16 @@ Vue.component('vue-modal', {
           obj['path']   = '';
           break;
         case 'FILE':
-          obj['format']       = {};
+          obj['format'] = {
+            type: 'template',
+            altText: '',    // ファイル名
+            template: {
+              type: 'buttons',
+              title: '',    // ファイル名
+              text: '※個のファイルは１週間後に削除されます。',
+              actions: [{ 'label': 'ダウンロード', 'type': 'uri', 'uri': '' }]
+            }
+          };
           obj['url']          = '';
           obj['origin_name']  = '';
           obj['name']         = '';
@@ -316,7 +332,7 @@ Vue.component('vue-modal', {
           v-if="!msg.url"
           drag
           action="https://timeconcier.jp/forline/tccom/v2/tcLibFileUpload/"
-          :accept="config.file_upload_accept"
+          :accept="objectToArrayByKey(config.file_upload_accept, 'value').join(',')"
           :limit="1"
           :show-file-list="false"
           :on-preview="msg.format.previewImageUrl"
@@ -335,6 +351,11 @@ Vue.component('vue-modal', {
             });
             console.log(uploaded_file)
             if(uploaded_file.length) {
+              // メッセージテンプレート
+              $set(msg.format,                      'altText',  data.file.name);
+              $set(msg.format.template,             'title',    data.file.name);
+              $set(msg.format.template.actions[0],  'uri',      uploaded_file[0].url);
+
               $set(msg, 'url',          uploaded_file[0].url);
               $set(msg, 'origin_name',  data.file.name);
               $set(msg, 'name',         uploaded_file[0].name);
@@ -346,8 +367,9 @@ Vue.component('vue-modal', {
           <i class="el-icon-upload"></i>
           <div class="el-upload__text">ドラッグまたは<em>クリック</em>でアップロード</div>
           <div class="el-upload__tip d-flex flex-column" slot="tip">
-            <small style="line-height:initial;">※タイムコンシェル社にアップロードしたファイルURLを送信します。</small>
-            <small style="line-height:initial;">※ファイル保存期間は1週間です。</small>
+            <small>送信可能なファイル：{{objectToArrayByKey(config.file_upload_accept, 'label').join('/')}}</small>
+            <small>※タイムコンシェル社にアップロードしたファイルURLを送信します。</small>
+            <small>※ファイル保存期間は1週間です。</small>
           </div>
         </el-upload>
         <div
@@ -378,13 +400,28 @@ Vue.component('vue-modal', {
       </template>
 
       <template v-else-if="msg.sect == 'RICHTEXT'">
+        <el-input
+          class="mb-2"
+          placeholder="タイトル"
+          v-model="msg.title"
+        ></el-input>
         <quill-editor
           v-model="msg.contents"
           ref="quillEditor"
           :options="{
-              theme: 'snow'
+            theme: 'snow',
+            modules: {
+              toolbar: [
+                ['bold', 'italic', 'underline', 'strike'],
+                ['blockquote', 'code-block'],
+                [{ list: 'ordered' }, { list: 'bullet' }],
+                [{ indent: '-1' }, { indent: '+1' }],
+                [{ header: [1, 2, 3, 4, 5, 6, false] }],
+                [{ color: [] }, { background: [] }],
+                ['clean'],
+              ],
             }
-          "
+          }"
         ></vue-quill-editor>
       </template>
 
