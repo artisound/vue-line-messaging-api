@@ -13,12 +13,12 @@ Vue.component('vue-modal', {
       sticker_tab: Object.keys( stickers() )[0],
       isReply: false,
       objContents: [
-        { label: 'テキスト',          value: 'TEXT',         icon: 'far fa-comment' },
-        { label: 'スタンプ',          value: 'STICKER',      icon: 'far fa-smile' },
-        { label: '写真',              value: 'IMAGE',        icon: 'far fa-image' },
-        { label: 'ファイル',          value: 'FILE',         icon: 'far fa-file' },
-        { label: 'リッチテキスト',    value: 'RICHTEXT',     icon: 'fas fa-comment-dots' },
-        { label: '受信Box',           value: 'INFORMATION',  icon: 'fas fa-clipboard' },
+        { value: 'TEXT',        label: 'テキスト',  icon: 'fa-regular fa-comment' },
+        { value: 'STICKER',     label: 'スタンプ',  icon: 'fa-regular fa-face-smile' },
+        { value: 'IMAGE',       label: '写真',      icon: 'fa-regular fa-image' },
+        { value: 'FILE',        label: 'ファイル',  icon: 'fa-regular fa-file' },
+        { value: 'RICHTEXT',    label: 'リッチ',    icon: 'fa-solid fa-inbox' },
+        { value: 'INFORMATION', label: 'お知らせ',  icon: 'fa-solid fa-circle-info' },
       ]
     }
   },
@@ -147,18 +147,18 @@ Vue.component('vue-modal', {
           <el-button
             :disabled="i == 0 ? true : false"
             @click="messages.splice(i - 1, 1, ...messages.splice(i, 1, messages[i - 1]))"
-          ><i class="fas fa-chevron-up"></i></el-button>
+          ><i class="fa-solid fa-chevron-up"></i></el-button>
           <el-button
             :disabled="messages.length == 1 || i == messages.length - 1 ? true : false"
             @click="messages.splice(i, 1, ...messages.splice(i + 1, 1, messages[i]))"
-          ><i class="fas fa-chevron-down"></i></el-button>
+          ><i class="fa-solid fa-chevron-down"></i></el-button>
           <el-button
             @click="$set(messages, i, objMsgType(msg.sect));"
-          ><i class="fas fa-eraser"></i></el-button>
+          ><i class="fa-solid fa-erase"></i></el-button>
           <el-button
             :disabled="messages.length == 1 ? true : false"
             @click="messages.splice(i, 1);"
-          ><i class="fas fa-times"></i></el-button>
+          ><i class="fa-solid fa-xmark"></i></el-button>
         </el-button-group>
       </div>
 
@@ -267,7 +267,7 @@ Vue.component('vue-modal', {
             }
           }"
         >
-          <i class="el-icon-upload"></i>
+          <i class="fa-solid fa-cloud-arrow-up"></i>
           <div class="el-upload__text">ドラッグまたは<em>クリック</em>でアップロード</div>
           <div class="el-upload__tip d-flex flex-column" slot="tip">
             <small style="line-height:initial;">※タイムコンシェル社にアップロードしたファイルURLを送信します。</small>

@@ -23,7 +23,7 @@
     ],
     "css": [
       "https://unpkg.com/element-ui/lib/theme-chalk/index.css",
-      "https://use.fontawesome.com/releases/v5.6.1/css/all.css",
+      "https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css",
       "https://cdn.jsdelivr.net/combine/npm/bootstrap@5/dist/css/bootstrap-grid.min.css,npm/bootstrap@5/dist/css/bootstrap-utilities.min.css",
       "css/51-modern-default.css",
       "css/desktop.css"
@@ -50,7 +50,7 @@
     ],
     "css": [
       "https://unpkg.com/element-ui/lib/theme-chalk/index.css",
-      "https://use.fontawesome.com/releases/v5.6.1/css/all.css",
+      "https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css",
       "https://cdn.jsdelivr.net/npm/quill@1/dist/quill.core.css",
       "https://cdn.jsdelivr.net/npm/quill@1/dist/quill.snow.css",
       "https://cdn.jsdelivr.net/combine/npm/bootstrap@5/dist/css/bootstrap-grid.min.css,npm/bootstrap@5/dist/css/bootstrap-utilities.min.css",

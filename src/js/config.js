@@ -59,14 +59,13 @@
         fields: [],
         spaces: [],
         fields_deliveryLogApp: [],
-
         msg_classes: [
-          { value: 'TEXT',        label: 'テキスト',  icon: 'far fa-comment' },
-          { value: 'STICKER',     label: 'スタンプ',  icon: 'far fa-smile' },
-          { value: 'IMAGE',       label: '写真',      icon: 'far fa-image' },
-          { value: 'FILE',        label: 'ファイル',  icon: 'far fa-file' },
-          { value: 'RICHTEXT',    label: 'リッチ',    icon: 'far fa-comment-dots' },
-          { value: 'INFORMATION', label: 'お知らせ',  icon: 'far fa-comment' },
+          { value: 'TEXT',        label: 'テキスト',  icon: 'fa-regular fa-comment' },
+          { value: 'STICKER',     label: 'スタンプ',  icon: 'fa-regular fa-face-smile' },
+          { value: 'IMAGE',       label: '写真',      icon: 'fa-regular fa-image' },
+          { value: 'FILE',        label: 'ファイル',  icon: 'fa-regular fa-file' },
+          { value: 'RICHTEXT',    label: 'リッチ',    icon: 'fa-solid fa-inbox' },
+          { value: 'INFORMATION', label: 'お知らせ',  icon: 'fa-solid fa-circle-info' },
         ],
         msg_options: [
           { label: 'テンプレート',  property: 'template' },
