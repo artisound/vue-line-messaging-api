@@ -13,3 +13,32 @@
 .justify-content-between {
     justify-content: space-between;
 }
+
+.el-dialog {
+    margin-top: 15vh;
+    width: 70%;
+    border-radius: 2%;
+}
+
+.el-dialog__header {
+    background-color: #0075ff;
+    border-radius: 2% 2% 0 0;
+    padding: 7px 20px;
+}
+
+.el-dialog__title {
+    color: #fff;
+}
+
+.el-card__header {
+    padding: 0;
+}
+
+.el-card__header > div:first-child {
+    background-color: rgba(0,0,0,0.03);
+    padding: 0.5rem 1.25rem;
+}
+
+.el-checkbox__label {
+    padding-left: 2px;
+}
