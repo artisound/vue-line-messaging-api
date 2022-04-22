@@ -15,7 +15,7 @@ Vue.component('vue-modal', {
       objContents: [
         { value: 'TEXT',        label: 'テキスト',  icon: 'fa-regular fa-comment' },
         { value: 'STICKER',     label: 'スタンプ',  icon: 'fa-regular fa-face-smile' },
-        { value: 'IMAGE',       label: '写真',      icon: 'fa-regular fa-image' },
+        { value: 'IMAGE',       label: '画像',      icon: 'fa-regular fa-image' },
         { value: 'FILE',        label: 'ファイル',  icon: 'fa-regular fa-file' },
         { value: 'RICHTEXT',    label: 'リッチ',    icon: 'fa-solid fa-inbox' },
         { value: 'INFORMATION', label: 'お知らせ',  icon: 'fa-solid fa-circle-info' },
@@ -120,7 +120,7 @@ Vue.component('vue-modal', {
           obj['format'] = { type: 'image', originalContentUrl: '', previewImageUrl: '' };
           obj['dialog'] = false;
           obj['path']   = '';
-          obj['base64'] = '';
+          obj['blob'] = '';
           obj['origin_name']  = '';
           break;
         case 'FILE':
@@ -130,14 +130,14 @@ Vue.component('vue-modal', {
             template: {
               type: 'buttons',
               title: '',    // ファイル名
-              text: '※ファイルURLは1週間有効です。\n(' + dayjs().add(1, 'week').format('YYYY/MM/DD') + ')',
+              text: '※ファイルURLは1週間有効です。\n(' + dayjs().add(1, 'week').format('YYYY/MM/DD') + ' 迄)',
               actions: [{ 'label': 'ダウンロード', 'type': 'uri', 'uri': '' }]
             }
           };
           obj['url']    = '';
           obj['name']   = '';
           obj['path']   = '';
-          obj['base64'] = '';
+          obj['blob'] = '';
           obj['origin_name']  = '';
           break;
         case 'RICHTEXT':
@@ -189,8 +189,42 @@ Vue.component('vue-modal', {
       return records;
     },
 
-    async get_manager(appId, recId) {
-      
+    /** ******************************************************************************************************
+     * TCサーバへファイルを保存
+     * @param {Object} data - ファイルデータ
+     ****************************************************************************************************** */
+    async upload_toTcServer(data) {
+      const async_url = 'https://timeconcier.jp/forline/tccom/v2/tcLibFileUpload/';
+      const fd        = new FormData();
+      fd.append('files[0]', data.file);
+      fd.append('period', '1w');  // 1週間後 削除
+
+      /** *********************************
+       * サーバへファイル送信
+       ********************************* */
+      const uploaded_file = await axios.post(async_url, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }).then(resp => {
+        return resp.status == 200 ? resp.data : resp;
+      }).catch(console.error);
+
+      console.log(uploaded_file)
+      let blob = null;
+      if(uploaded_file.length) {
+        const base64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(data.file);
+          reader.onload = () => { resolve(reader.result); };
+          reader.onerror = () => { reject(reader.error); };
+        });
+
+        const bin = atob(base64.replace(/^.*,/, ''));
+        const buffer = new Uint8Array(bin.length);
+        for (const i = 0; i < bin.length; i++) buffer[i] = bin.charCodeAt(i);
+        blob = new Blob([buffer.buffer], { type: data.file.type })
+      }
+      uploaded_file[0].blob = blob;
+      return uploaded_file;
     },
 
     /** ******************************************************************************************************
@@ -296,7 +330,7 @@ Vue.component('vue-modal', {
               await client.file.uploadFile({
                 file: {
                   name: msg.origin_name,
-                  data: msg.base64,
+                  data: msg.blob,
                 }
               }).then(resp => {
                 // fileKeys配列に格納
@@ -384,8 +418,6 @@ Vue.component('vue-modal', {
               '配信ファイルレコード番号': { value: fileLog_recId },
             };
 
-            // 太田さん
-            // rec_id: 12180
 
             // 顧客レコード番号
             // if (thisApp.recId) rec_prm[deliveryLogApp.customer_recId] = { value: tg[thisApp.recId].value };
@@ -402,7 +434,9 @@ Vue.component('vue-modal', {
               if (msg0.sect == 'TEXT') {
                 rec_prm[deliveryLogApp.message_content] = { value: msg0.reply ? messages[0].template.text : messages[0].text };
               } else {
-                rec_prm[deliveryLogApp.message_content] = { value: this.objContents.find(v => v.value == msg0.sect).value };
+                const sect_value = this.objContents.find(v => v.value == msg0.sect).value;
+                const sect_label = this.objContents.find(v => v.value == msg0.sect).label;
+                rec_prm[deliveryLogApp.message_content] = { value: '(' + sect_label + '配信)' };
               }
             }
             log_record_params.push(rec_prm)
@@ -410,7 +444,7 @@ Vue.component('vue-modal', {
         };
 
         console.log(log_record_params);
-        
+
 
         // ----------------------------
         // 一括追加
@@ -637,31 +671,14 @@ Vue.component('vue-modal', {
           :show-file-list="false"
           :on-preview="msg.format.previewImageUrl"
           :http-request="async data => {
-            const async_url = 'https://timeconcier.jp/forline/tccom/v2/tcLibFileUpload/';
-            const fd        = new FormData();
-            fd.append('files[0]', data.file);
-            fd.append('period', '1w');  // 1週間後 削除
+            const uploaded_file = await upload_toTcServer(data);
+            if(uploaded_file) {
+              $set(msg.format,  'originalContentUrl', uploaded_file[0].url);
+              $set(msg.format,  'previewImageUrl',    uploaded_file[0].url);
 
-            const uploaded_file = await axios.post(async_url, fd, {
-              headers: { 'Content-Type': 'multipart/form-data' },
-            }).then(resp => {
-              return resp.status == 200 ? resp.data : resp;
-            }).catch(err => {
-              console.error(err)
-            });
-            console.log(uploaded_file)
-            if(uploaded_file.length) {
-              const reader = new FileReader();
-              reader.onload = () => {
-                console.log( reader.result );
-                $set(msg, 'base64', reader.result);
-              }
-              reader.readAsDataURL(data.file);
-
-              $set(msg.format, 'originalContentUrl',  uploaded_file[0].url);
-              $set(msg.format, 'previewImageUrl',     uploaded_file[0].url);
-              $set(msg, 'path', uploaded_file[0].path);
-              $set(msg, 'origin_name',  data.file.name);
+              $set(msg,         'blob',               uploaded_file[0].blob);
+              $set(msg,         'path',               uploaded_file[0].path);
+              $set(msg,         'origin_name',        data.file.name);
             }
           }"
         >
@@ -713,34 +730,15 @@ Vue.component('vue-modal', {
           :limit="1"
           :show-file-list="false"
           :http-request="async data => {
-            const async_url = 'https://timeconcier.jp/forline/tccom/v2/tcLibFileUpload/';
-            const fd        = new FormData();
-            fd.append('files[0]', data.file);
-            fd.append('period', '1w');  // 1週間後 削除
-
-            const uploaded_file = await axios.post(async_url, fd, {
-              headers: { 'Content-Type': 'multipart/form-data' },
-            }).then(resp => {
-              return resp.status == 200 ? resp.data : resp;
-            }).catch(err => {
-              console.error(err)
-            });
-            console.log(uploaded_file)
-            if(uploaded_file.length) {
-              const reader = new FileReader();
-              reader.onload = () => {
-                console.log( reader.result );
-                $set(msg, 'base64', reader.result);
-              }
-              reader.readAsDataURL(data.file);
-
-              // メッセージテンプレート
+            const uploaded_file = await upload_toTcServer(data);
+            if(uploaded_file) {
               $set(msg.format,                      'altText',  data.file.name);
               $set(msg.format.template,             'title',    data.file.name);
               $set(msg.format.template.actions[0],  'uri',      uploaded_file[0].url + '?openExternalBrowser=1');
 
-              $set(msg, 'url',          uploaded_file[0].url);
               $set(msg, 'origin_name',  data.file.name);
+              $set(msg, 'url',          uploaded_file[0].url);
+              $set(msg, 'blob',         uploaded_file[0].blob);
               $set(msg, 'name',         uploaded_file[0].name);
               $set(msg, 'path',         uploaded_file[0].path);
             }
