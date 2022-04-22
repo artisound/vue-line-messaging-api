@@ -252,6 +252,8 @@ Vue.component('vue-modal', {
        *************************************************** */
       const targets = await this.get_targets();
       const lineIds = [];
+
+      // 対象者あり
       if (targets && targets.length) {
         targets.forEach(tg => {
           if(config.sync_thisApp.lineId) {
@@ -270,29 +272,6 @@ Vue.component('vue-modal', {
       }
 
       /** ***************************************************
-       * LINE メッセージ送信
-       *************************************************** */
-        // const send_msg = await axios.post(exec_url, {
-        //   accessToken: config.sync_line.channel_token,
-        //   action: 'multicastMessage',
-        //   data: {
-        //     to      : lineIds,
-        //     messages: messages,
-        //   }
-        // }).then(resp => {
-        //   console.log(resp);
-        //   return (resp.data && !Object.keys(resp.data).length) ? true : false;
-        // }).catch(console.error)
-
-        // if(!send_msg) {
-        //   this.$message({
-        //     type: 'error',
-        //     message: 'メッセージの送信に失敗しました。'
-        //   });
-        // }
-
-
-      /** ***************************************************
        * 送受信管理へ追加・メッセージ送信
        *************************************************** */
       if (config.sync_deliveryLogAppId) {
@@ -300,11 +279,12 @@ Vue.component('vue-modal', {
         const thisApp = config.sync_thisApp;
         const deliveryLogApp = config.sync_deliveryLogApp;
         const messageId = event.type.includes('index') ? `${timestamp}-bunch-${kintone.getLoginUser().id}` : `${timestamp}-unit-${lineIds[0]}`;
+        const msg0 = this.messages[0];
 
         // 送受信管理のレコードオブジェクトを作成
         const log_record_params = [];
-        targets.forEach((tg, i) => {
-          const lineId = rec[deliveryLogApp.customer_lineId].value
+        for (const tg of targets) {
+          const lineId = tg[thisApp.lineId].value
           if (lineId && messages.length) {
 
             /** ********************************
@@ -319,7 +299,7 @@ Vue.component('vue-modal', {
             /** ********************************
              * LINE メッセージ送信
              ******************************** */
-            if (messages.length == 1 && this.messages[0].reply) {
+            if (messages.length == 1 && msg0.reply) {
               messages[0].template.actions[0].uri = `https://liff.line.me/${config.sync_liff.reply}?dest=0&msgid=${messageId}`;
             }
 
@@ -354,7 +334,6 @@ Vue.component('vue-modal', {
 
             // メッセージが1件のみの場合
             if (messages.length == 1) {
-              const msg0 = this.messages[0];
               if (msg0.sect == 'TEXT') {
                 rec_prm[deliveryLogApp.message_content] = { value: msg0.reply ? messages[0].template.text : messages[0].text };
               } else {
@@ -363,7 +342,7 @@ Vue.component('vue-modal', {
             }
             log_record_params.push(rec_prm)
           }
-        });
+        };
 
 
         // ----------------------------
