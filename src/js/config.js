@@ -97,6 +97,9 @@
         }
       }
 
+      // フィールド情報取得
+      if(this.config.sync_deliveryLogAppId) this.get_formFields(this.config.sync_deliveryLogAppId, 'fields_deliveryLogApp');
+      if(this.config.sync_fileLogAppId)     this.get_formFields(this.config.sync_fileLogAppId, 'fields_fileLogApp');
 
       // 【API】自アプリの一覧情報取得
       await client.app.getViews({ app: thisAppId }).then(rsp_view => {
