@@ -281,6 +281,55 @@ Vue.component('vue-modal', {
         const messageId = event.type.includes('index') ? `${timestamp}-bunch-${kintone.getLoginUser().id}` : `${timestamp}-unit-${lineIds[0]}`;
         const msg0 = this.messages[0];
 
+
+        /** ***************************************************
+         * ファイルログ
+         *************************************************** */
+        let fileLog_recId = '';
+        if (config.sync_fileLogAppId) {
+          const fileLogApp = config.sync_fileLogApp;
+
+          const fileKeys = [];
+          // ファイルアップロード -> fileKey格納
+          for (const msg of this.messages) {
+            if (['IMAGE', 'FILE'].includes(msg.sect)) {
+              await client.file.uploadFile({
+                file: {
+                  name: msg.origin_name,
+                  data: msg.base64,
+                }
+              }).then(resp => {
+                // fileKeys配列に格納
+                console.log('レスポンス: ', resp);
+                fileKeys.push(resp);
+              }).catch(console.error);
+            }
+          }
+
+          console.log('ファイルキー配列: ', fileKeys);
+          if(!fileKeys.length) return;
+
+
+          // レコード登録用オブジェクト生成
+          const log_record_params = {};
+          if (fileLogApp.date)   log_record_params[fileLogApp.date]   = { value: dayjs(timestamp).format('YYYY-MM-DD') };
+          if (fileLogApp.time)   log_record_params[fileLogApp.time]   = { value: dayjs(timestamp).format('HH:mm') };
+          if (fileLogApp.file)   log_record_params[fileLogApp.file]   = { value: fileKeys };
+          if (fileLogApp.target) log_record_params[fileLogApp.target] = { value: event.type.includes('index') ? '一括' : '個別' };
+
+          console.log('ログレコードパラメータ: ', log_record_params);
+          if (Object.keys(log_record_params).length) {
+            // レコード作成
+            const addRecord = await client.record.addRecord({
+              app: config.sync_fileLogAppId,
+              record: log_record_params,
+            })
+            console.log(addRecord);
+            fileLog_recId = addRecord.id;
+          }
+        }
+
+
         // 送受信管理のレコードオブジェクトを作成
         const log_record_params = [];
         for (const tg of targets) {
@@ -324,16 +373,23 @@ Vue.component('vue-modal', {
               console.error(err);
             });
 
+
             const rec_prm = {
               'メッセージ区分': { value: '送信' },
               '連絡手段'      : { value: 'LINE' },
               '送信対象'      : { value: event.type.includes('index') ? '一括' : '個別' },
               'メッセージID'  : { value: messageId },
+              '添付有無'      : { value: this.messages.find(v => ['IMAGE', 'FILE'].includes(v.sect)) ? 'あり' : 'なし' },
               '返信受付'      : { value: msg0.reply ? 'あり' : 'なし' },
+              '配信ファイルレコード番号': { value: fileLog_recId },
             };
 
+            // 太田さん
+            // rec_id: 12180
+
             // 顧客レコード番号
-            if (thisApp.recId) rec_prm[deliveryLogApp.customer_recId] = { value: tg[thisApp.recId].value };
+            // if (thisApp.recId) rec_prm[deliveryLogApp.customer_recId] = { value: tg[thisApp.recId].value };
+            if (thisApp.recId) rec_prm[deliveryLogApp.customer_recId] = { value: 12180 };
             // 顧客LINEユーザーID
             if (thisApp.lineId) rec_prm[deliveryLogApp.customer_lineId] = { value: tg[thisApp.lineId].value };
             // 担当者レコード番号
@@ -353,8 +409,8 @@ Vue.component('vue-modal', {
           }
         };
 
-        // 太田さん
-        // rec_id: 12180
+        console.log(log_record_params);
+        
 
         // ----------------------------
         // 一括追加
@@ -377,46 +433,6 @@ Vue.component('vue-modal', {
         }
 
 
-        /** ***************************************************
-         * ファイルログ
-         *************************************************** */
-        if (config.sync_fileLogAppId) {
-          const fileLogApp = config.sync_fileLogApp;
-
-          const fileKeys = [];
-          // ファイルアップロード -> fileKey格納
-          for (const msg of this.messages) {
-            if (['IMAGE', 'FILE'].includes(msg.sect)) {
-              await client.file.uploadFile({
-                file: {
-                  name: msg.origin_name,
-                  data: msg.base64,
-                }
-              }).then(resp => {
-                // fileKeys配列に格納
-                fileKeys.push(resp.fileKey);
-              }).catch(console.error);
-            }
-          }
-          if(!fileKeys.length) return;
-
-
-          // レコード登録用オブジェクト生成
-          const log_record_params = {};
-          if (fileLogApp.date)   log_record_params[fileLogApp.date].value   = dayjs(timestamp).format('YYYY-MM-DD');
-          if (fileLogApp.time)   log_record_params[fileLogApp.time].value   = dayjs(timestamp).format('HH:mm');
-          if (fileLogApp.file)   log_record_params[fileLogApp.file].value   = fileKeys;
-          if (fileLogApp.target) log_record_params[fileLogApp.target].value = event.type.includes('index') ? '一括' : '個別';
-
-          if (Object.keys(log_record_params).length) {
-            // レコード作成
-            const addRecord = await client.addRecord({
-              app: config.sync_fileLogAppId,
-              record: log_record_params,
-            })
-            console.log(addRecord);
-          }
-        }
       }
 
       this.$message({
