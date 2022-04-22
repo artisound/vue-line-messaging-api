@@ -44,6 +44,7 @@
             reception_time  : '',     // 受付時刻
             delivery_class  : '',     // 送信区分
             manager_recId   : '',     // 担当者レコード番号
+            message_status  : '',     // 配信成功 / 失敗
             line_notification: false, // 受信時LINE通知
           },
           sync_fileLogAppId: '',  // 配信ファイルログ系アプリ - アプリ番号

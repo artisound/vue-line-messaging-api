@@ -572,6 +572,28 @@
 
           <div class="">
             <div class="kuc-label">
+              <span>配信成功 / 失敗</span>
+            </div>
+
+            <div class="simpleSel ssel1">
+              <select
+                v-model="config.sync_deliveryLogApp.message_status"
+                class="form-val"
+              >
+                <option value="">----</option>
+                <template v-for="(fld, i) in fields_deliveryLogApp">
+                  <option
+                    v-if="['RADIO_BUTTON', 'DROP_DOWN'].includes(fld.type)"
+                    :key="i"
+                    :value="fld.code"
+                  >{{ fld.label }}</option>
+                </template>
+              </select>
+            </div>
+          </div>
+
+          <div class="">
+            <div class="kuc-label">
               <span>受信時LINE通知</span>
             </div>
 
