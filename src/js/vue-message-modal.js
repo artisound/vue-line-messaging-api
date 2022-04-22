@@ -303,16 +303,25 @@ Vue.component('vue-modal', {
               messages[0].template.actions[0].uri = `https://liff.line.me/${config.sync_liff.reply}?dest=0&msgid=${messageId}`;
             }
 
-            const message_status = await axios.post(exec_url, {
+            console.log('messages', messages);
+
+            const message_success = await axios.post(exec_url, {
               accessToken: config.sync_line.channel_token,
               action: 'pushMessage',
               data: { to: lineId, messages: messages },
             }).then(resp => {
-              console.error(resp);
-              return (resp.data && !Object.keys(resp.data).length) ? '成功' : '失敗';
+              console.log(resp);
+              if (resp.data && !Object.keys(resp.data).length) {
+                /** ******************************
+                 * リッチメニュー切り替え
+                 ****************************** */
+
+
+
+                return true;
+              }
             }).catch(err => {
               console.error(err);
-              return '失敗';
             });
 
             const rec_prm = {
@@ -330,7 +339,7 @@ Vue.component('vue-modal', {
             // 担当者レコード番号
             if (thisApp.manager_recId) rec_prm[deliveryLogApp.manager_recId] = { value: tg[thisApp.manager_recId].value };
             // 配信成功 / 失敗
-            if (deliveryLogApp.message_status) rec_prm[deliveryLogApp.message_status] = { value: message_status };
+            if (deliveryLogApp.message_status) rec_prm[deliveryLogApp.message_status] = { value: message_success ? '成功' : '失敗' };
 
             // メッセージが1件のみの場合
             if (messages.length == 1) {
@@ -344,17 +353,28 @@ Vue.component('vue-modal', {
           }
         };
 
+        // 太田さん
+        // rec_id: 12180
 
         // ----------------------------
         // 一括追加
         // ----------------------------
         // レコード追加
-        const addRecords = await client.record.addAllRecords({
-          app    : config.sync_deliveryLogAppId,
-          records: log_record_params,
-        }).then(resp => { return resp.records; }).catch(console.error);
-        console.log('addAllRecords', addRecords);
-        if (!addRecords) return;
+        if(log_record_params.length > 100) {
+          const addRecords = await client.record.addAllRecords({
+            app    : config.sync_deliveryLogAppId,
+            records: log_record_params,
+          }).then(resp => { return resp.records; }).catch(console.error);
+          console.log('addAllRecords', addRecords);
+          if (!addRecords) return;
+        } else {
+          const addRecords = await client.record.addRecords({
+            app    : config.sync_deliveryLogAppId,
+            records: log_record_params,
+          }).then(resp => { return resp.records; }).catch(console.error);
+          console.log('addAllRecords', addRecords);
+          if (!addRecords) return;
+        }
 
 
         /** ***************************************************
