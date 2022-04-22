@@ -272,7 +272,6 @@ Vue.component('vue-modal', {
       /** ***************************************************
        * LINE メッセージ送信
        *************************************************** */
-        // const exec_url = 'https://timeconcier.jp/forline/tccom/v2/tcLibLINE/';
         // const send_msg = await axios.post(exec_url, {
         //   accessToken: config.sync_line.channel_token,
         //   action: 'multicastMessage',
@@ -297,179 +296,127 @@ Vue.component('vue-modal', {
        * 送受信管理へ追加・メッセージ送信
        *************************************************** */
       if (config.sync_deliveryLogAppId) {
+        const exec_url = 'https://timeconcier.jp/forline/tccom/v2/tcLibLINE/';
         const thisApp = config.sync_thisApp;
         const deliveryLogApp = config.sync_deliveryLogApp;
         const messageId = event.type.includes('index') ? `${timestamp}-bunch-${kintone.getLoginUser().id}` : `${timestamp}-unit-${lineIds[0]}`;
 
+        // 送受信管理のレコードオブジェクトを作成
         const log_record_params = [];
         targets.forEach((tg, i) => {
-          const rec_prm = {
-            'メッセージ区分': { value: '送信' },
-            '連絡手段'      : { value: 'LINE' },
-            '送信対象'      : { value: event.type.includes('index') ? '一括' : '個別' },
-            'メッセージID'  : { value: messageId },
-          };
+          const lineId = rec[deliveryLogApp.customer_lineId].value
+          if (lineId && messages.length) {
 
-          rec_prm[deliveryLogApp.customer_recId] = { value: lineId };
-          if (thisApp.manager_recId) rec_prm[thisApp.manager_recId] = { value: tg[thisApp.manager_recId].value };
-
-          // メッセージが1件のみの場合
-          if (messages.length == 1) {
-            const msg0 = this.messages[0];
-
-            rec_prm['返信受付'] = { value: msg0.reply ? 'あり' : 'なし' };
-            if (msg0.sect == 'TEXT') {
-              rec_prm[deliveryLogApp.message_content] = { value: msg0.reply ? messages[0].template.text : messages[0].text };
-            } else {
-              rec_prm[deliveryLogApp.message_content] = { value: this.objContents.find(v => v.value == msg0.sect).value };
-            }
-          }
-          log_record_params.push(rec_prm)
-        });
-
-        /** ***************************************************
-         * ユーザー数に応じて処理切り分け
-         *************************************************** */
-        if (log_record_params.length) {
-          if (log_record_params.length > 1) {
-            // ----------------------------
-            // 一括追加
-            // ----------------------------
-            // レコード追加
-            const addRecords = await client.record.addAllRecords({
-              app    : config.sync_deliveryLogAppId,
-              records: log_record_params,
-            }).then(resp => { return resp.records; }).catch(console.error);
-            console.log('addAllRecords', addRecords);
-            if (!addRecords) return;
-
-            const recIds = this.objectToArrayByKey(addRecords, 'id');
-            const minId = this.get_max_min_byArray(recIds, 'min');  // レコード番号MIN
-            const maxId = this.get_max_min_byArray(recIds, 'max');  // レコード番号MAX
-
-            // 追加したレコードを取得
-            const getRecords = await client.record.getAllRecords({
-              app      : config.sync_deliveryLogAppId,
-              condition: `$id >= ${minId} and $id <= ${maxId}`
-            }).then(async resp => { return resp; }).catch(console.error);
+            /** ********************************
+             * 埋め込み文字の処理
+             ******************************** */
+            //
+            //
+            //
+            /** ***************************** */
 
 
-            const ngIds = [];
-            for (const rec of getRecords) {
-              const lineId = rec[deliveryLogApp.customer_lineId].value
-              if (lineId && messages.length) {
-                // LINE メッセージ送信
-                const send = await axios.post(exec_url, {
-                  accessToken: config.sync_line.channel_token,
-                  action: 'pushMessage',
-                  data: { to: lineId, messages: messages },
-                })
-
-                if (send.data && !Object.keys(send.data).length) {
-                  // 成功
-                  console.log('send', rec.$id.value + ' - OK');
-                } else {
-                  // 失敗
-                  console.log('send', rec.$id.value + ' - NG');
-                  ngIds.push(rec.$id.value);
-                }
-              }
-            }
-
-            if (ngIds.length) {
-              const ngRecs = [];
-              ngIds.forEach(rec_id => {
-                ngRecs.push({
-                  id: rec_id,
-                  record: { メッセージ区分: { value: '－' } }
-                });
-              });
-
-              // メッセージ区分 書き換え
-              await client.record.updateRecords({
-                app: config.sync_deliveryLogAppId,
-                records: ngRecs,
-              });
-            }
-
-          } else {
-            // ----------------------------
-            // 単一追加
-            // ----------------------------
-            // レコード追加
-            const addRecord = await client.record.addRecord({
-              app   : config.sync_deliveryLogAppId,
-              record: log_record_params[0],
-            });
-            if (!addRecord) return;
-
-
-            // 追加したレコードを取得
-            const getRecord = await client.record.getRecord({
-              app : config.sync_deliveryLogAppId,
-              id  : addRecord.id
-            })
-            if (!getRecord) return;
-            const rec = getRecord.record
-
+            /** ********************************
+             * LINE メッセージ送信
+             ******************************** */
             if (messages.length == 1 && this.messages[0].reply) {
-              const format = this.messages[0].format;
-              this.$set(format.template.actions[0], 'uri', `https://liff.line.me/${config.sync_liff.reply}?dest=0&msgid=${messageId}`)
+              messages[0].template.actions[0].uri = `https://liff.line.me/${config.sync_liff.reply}?dest=0&msgid=${messageId}`;
             }
 
-
-            // LINE メッセージ送信
-            const lineId = rec[deliveryLogApp.customer_lineId].value
-            const send   = await axios.post(exec_url, {
+            const message_status = await axios.post(exec_url, {
               accessToken: config.sync_line.channel_token,
               action: 'pushMessage',
               data: { to: lineId, messages: messages },
+            }).then(resp => {
+              console.error(resp);
+              return (resp.data && !Object.keys(resp.data).length) ? '成功' : '失敗';
+            }).catch(err => {
+              console.error(err);
+              return '失敗';
             });
 
+            const rec_prm = {
+              'メッセージ区分': { value: '送信' },
+              '連絡手段'      : { value: 'LINE' },
+              '送信対象'      : { value: event.type.includes('index') ? '一括' : '個別' },
+              'メッセージID'  : { value: messageId },
+              '返信受付'      : { value: msg0.reply ? 'あり' : 'なし' },
+            };
 
-            // LINE メッセージ送信結果
-            if (send.data && !Object.keys(send.data).length) {
-              // 成功
-              console.log('send', rec.$id.value + ' - OK');
-            } else {
-              // 失敗
-              console.log('send', rec.$id.value + ' - NG');
+            // 顧客レコード番号
+            if (thisApp.recId) rec_prm[deliveryLogApp.customer_recId] = { value: tg[thisApp.recId].value };
+            // 顧客LINEユーザーID
+            if (thisApp.lineId) rec_prm[deliveryLogApp.customer_lineId] = { value: tg[thisApp.lineId].value };
+            // 担当者レコード番号
+            if (thisApp.manager_recId) rec_prm[deliveryLogApp.manager_recId] = { value: tg[thisApp.manager_recId].value };
+            // 配信成功 / 失敗
+            if (deliveryLogApp.message_status) rec_prm[deliveryLogApp.message_status] = { value: message_status };
 
-              // メッセージ区分 書き換え
-              await client.record.updateRecord({
-                app: config.sync_deliveryLogAppId,
-                id: rec.$id.value,
-                record: { メッセージ区分: { value: '－' } },
-              });
+            // メッセージが1件のみの場合
+            if (messages.length == 1) {
+              const msg0 = this.messages[0];
+              if (msg0.sect == 'TEXT') {
+                rec_prm[deliveryLogApp.message_content] = { value: msg0.reply ? messages[0].template.text : messages[0].text };
+              } else {
+                rec_prm[deliveryLogApp.message_content] = { value: this.objContents.find(v => v.value == msg0.sect).value };
+              }
             }
+            log_record_params.push(rec_prm)
           }
-        }
+        });
+
+
+        // ----------------------------
+        // 一括追加
+        // ----------------------------
+        // レコード追加
+        const addRecords = await client.record.addAllRecords({
+          app    : config.sync_deliveryLogAppId,
+          records: log_record_params,
+        }).then(resp => { return resp.records; }).catch(console.error);
+        console.log('addAllRecords', addRecords);
+        if (!addRecords) return;
+
 
         /** ***************************************************
          * ファイルログ
          *************************************************** */
         if (config.sync_fileLogAppId) {
           const fileLogApp = config.sync_fileLogApp;
-          const uploadFile = await client.file.uploadFile({
-            file: {
-              name: data.file.name,
-              data: msg.base64,
+
+          const fileKeys = [];
+          // ファイルアップロード -> fileKey格納
+          for (const msg of this.messages) {
+            if (['IMAGE', 'FILE'].includes(msg.sect)) {
+              await client.file.uploadFile({
+                file: {
+                  name: msg.origin_name,
+                  data: msg.base64,
+                }
+              }).then(resp => {
+                // fileKeys配列に格納
+                fileKeys.push(resp.fileKey);
+              }).catch(console.error);
             }
-          })
-          if(!uploadFile) return;
+          }
+          if(!fileKeys.length) return;
 
 
+          // レコード登録用オブジェクト生成
           const log_record_params = {};
-          if (fileLogApp.date)   log_record_params[fileLogApp.date]   = dayjs(timestamp).format('YYYY-MM-DD');
-          if (fileLogApp.time)   log_record_params[fileLogApp.time]   = dayjs(timestamp).format('HH:mm');
-          if (fileLogApp.file)   log_record_params[fileLogApp.file]   = uploadFile.fileKey;
-          if (fileLogApp.target) log_record_params[fileLogApp.target] = event.type.includes('index') ? '一括' : '個別';
+          if (fileLogApp.date)   log_record_params[fileLogApp.date].value   = dayjs(timestamp).format('YYYY-MM-DD');
+          if (fileLogApp.time)   log_record_params[fileLogApp.time].value   = dayjs(timestamp).format('HH:mm');
+          if (fileLogApp.file)   log_record_params[fileLogApp.file].value   = fileKeys;
+          if (fileLogApp.target) log_record_params[fileLogApp.target].value = event.type.includes('index') ? '一括' : '個別';
 
-          const addRecord = await client.addRecord({
-            app: config.sync_fileLogAppId,
-            record: log_record_params,
-          })
-          console.log(addRecord);
+          if (Object.keys(log_record_params).length) {
+            // レコード作成
+            const addRecord = await client.addRecord({
+              app: config.sync_fileLogAppId,
+              record: log_record_params,
+            })
+            console.log(addRecord);
+          }
         }
       }
 
@@ -478,8 +425,8 @@ Vue.component('vue-modal', {
         message: 'メッセージが送信されました。'
       });
 
-      // // ダイアログを閉じる
-      // this.$emit('change', false);
+      // ダイアログを閉じる
+      this.$emit('change', false);
       console.groupEnd('send_lineMessage()');
     },
 
