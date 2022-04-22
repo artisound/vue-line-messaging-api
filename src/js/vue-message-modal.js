@@ -208,19 +208,22 @@ Vue.component('vue-modal', {
         return resp.status == 200 ? resp.data : resp;
       }).catch(console.error);
 
-      console.log(uploaded_file)
       let blob = null;
       if(uploaded_file.length) {
+        // ファイルをbase64文字列で取得
         const base64 = await new Promise((resolve, reject) => {
           const reader = new FileReader();
           reader.readAsDataURL(data.file);
-          reader.onload = () => { resolve(reader.result); };
+          reader.onload  = () => { resolve(reader.result); };
           reader.onerror = () => { reject(reader.error); };
         });
 
+        // base64をバイナリに変換
         const bin = atob(base64.replace(/^.*,/, ''));
         const buffer = new Uint8Array(bin.length);
         for (const i = 0; i < bin.length; i++) buffer[i] = bin.charCodeAt(i);
+
+        // バイナリをblobに変換
         blob = new Blob([buffer.buffer], { type: data.file.type })
       }
       uploaded_file[0].blob = blob;
@@ -392,15 +395,23 @@ Vue.component('vue-modal', {
               accessToken: config.sync_line.channel_token,
               action: 'pushMessage',
               data: { to: lineId, messages: messages },
-            }).then(resp => {
+            }).then(async resp => {
               console.log(resp);
               if (resp.data && !Object.keys(resp.data).length) {
+
                 /** ******************************
                  * リッチメニュー切り替え
+                 * - RICHTEXT | INFORMATION
                  ****************************** */
-
-
-
+                const inboxMessage = this.messages.find(v => ['RICHTEXT', 'INFORMATION'].includes(v.sect));
+                if(inboxMessage) {
+                  const change_richmenu = await axios.post(exec_url, {
+                    accessToken: config.sync_line.channel_token,
+                    action: 'linkRichmenuToUser',
+                    data: { lineUserId: lineId, richMenuId: config.sync_line.richmenuId_badged },
+                  })
+                  console.log(change_richmenu)
+                }
                 return true;
               }
             }).catch(err => {
