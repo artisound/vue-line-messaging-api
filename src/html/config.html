@@ -127,7 +127,7 @@
               class="form-val"
             >
               <option
-                v-for="i in 3"
+                v-for="i in 5"
                 :key="i"
                 :value="i"
               >{{ i }}通</option>
@@ -146,6 +146,7 @@
             class="kuc-input-checkbox-item"
           >
             <input
+              disabled
               v-model="config.msg_option[opt.property]"
               class="form-chk"
               type="checkbox"
