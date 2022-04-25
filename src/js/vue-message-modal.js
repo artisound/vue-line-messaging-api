@@ -7,6 +7,7 @@ Vue.component('vue-modal', {
   props: ['dialog', 'config', 'kintoneEvent'],
   data() {
     return {
+      loading: {},
       radio: '今すぐ配信',
       contentsRadio: '',
       messages: [],
@@ -478,6 +479,12 @@ Vue.component('vue-modal', {
     async send_lineMessage() {
       console.clear();
       console.group('send_lineMessage()');
+      this.loading   = this.$loading({
+        lock: true,
+        background: 'rgba(0, 0, 0, 0.3)',
+        text: '処理中...'
+      });
+
       const client    = new KintoneRestAPIClient(); // kintone Rest API Client
       const timestamp = date.getTime();     // 現在時刻タイムスタンプ
       const config    = this.config;        // 設定情報
@@ -500,6 +507,7 @@ Vue.component('vue-modal', {
       let messages = this.create_messagesForLineAPI();
       // メッセージなし -> エラーメッセージ & 処理終了
       if(!messages.length) {
+        this.loading.close();
         this.$message({
           type: 'error',
           message: '送信するメッセージの内容が正しくありません。'
@@ -515,6 +523,7 @@ Vue.component('vue-modal', {
       console.log(lineIds)
       // 対象者なし -> エラーメッセージ & 処理終了
       if(!lineIds.length) {
+        this.loading.close();
         this.$message({
           type: 'error',
           message: '該当のお客様が存在しません。'
@@ -539,7 +548,7 @@ Vue.component('vue-modal', {
         let fileLog_recId = '';
         if (config.sync_fileLogAppId) {
           const fileLogRecord = await this.create_fileLogRecord();
-          console.log(fileLogRecord)
+          console.log('fileLogRecord', fileLogRecord)
           if(fileLogRecord) {
             fileLog_recId = fileLogRecord.id;
           }
@@ -554,7 +563,7 @@ Vue.component('vue-modal', {
             /** ********************************
              * 埋め込み文字の処理
              ******************************** */
-            if(embed.length) {
+            if(this.embed.length) {
               for (let n = 0; n < messages.length; n++) {
                 const msg = messages[n];
                 msg = Object.create(msg);   // 参照渡し防止
@@ -597,6 +606,7 @@ Vue.component('vue-modal', {
         const addRecords = await this.create_deliveryLog(log_record_params);
         // レコード登録エラー -> エラーメッセージ & 処理終了
         if(!addRecords.length) {
+          this.loading.close();
           this.$message({
             type: 'error',
             message: '送受信管理アプリへのレコードを作成できませんでした。'
@@ -606,6 +616,7 @@ Vue.component('vue-modal', {
         }
       }
 
+      this.loading.close();
       this.$message({
         type: 'success',
         message: 'メッセージが送信されました。'

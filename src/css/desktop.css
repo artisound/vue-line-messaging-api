@@ -21,7 +21,6 @@ hr {
     line-height: initial !important;
 }
 
-
 .el-dialog__header {
     background-color: #0075ff;
     padding-top: 15px;
@@ -51,4 +50,8 @@ hr {
 
 .el-tabs__content {
     padding: 0;
+}
+
+.el-loading-mask i {
+    font-size: 100px;
 }
