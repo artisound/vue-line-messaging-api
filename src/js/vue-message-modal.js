@@ -629,11 +629,22 @@ Vue.component('vue-modal', {
   template: `
   <el-dialog
     width="70%"
-    title="LINEメッセージ配信"
     :visible.sync="toggleDialog"
     :show-close="false"
     :before-close="handleClose"
   >
+    <div
+      slot="title"
+      class="d-flex align-items-center"
+    >
+      <span class="m-0 text-white">LINEメッセージ配信</span>
+      <div class="flex-grow-1"></div>
+      <i
+        class="el-icon-close text-white h3 m-0"
+        style="cursor:pointer;font-size:25px;"
+        @click="$emit('change', false)"
+      ></i>
+    </div>
     <div>
       <!-- タイミング指定 -->
       <div class="my-3">
