@@ -445,6 +445,7 @@ Vue.component('vue-modal', {
      * LINE メッセージ送信
      ****************************************************************************************************** */
     async send_lineMessage() {
+      console.clear();
       console.group('send_lineMessage()');
       const client    = new KintoneRestAPIClient(); // kintone Rest API Client
       const timestamp = date.getTime();     // 現在時刻タイムスタンプ
@@ -914,6 +915,7 @@ Vue.component('vue-modal', {
       </el-button>
     </div>
 
+    <hr>
     <div
       slot="footer"
       class="divided dialog-footer d-flex justify-content-end"
