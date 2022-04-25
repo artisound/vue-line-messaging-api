@@ -80,7 +80,7 @@ Vue.component('vue-modal', {
       if(this.messages.length > 1) {
         this.messages.forEach(msg => {
           console.log(msg)
-          if (msg.sect == 'TEXT') {
+          if (msg.sect == 'TEXT' && msg.reply) {
             this.$set(msg, 'reply', false);
             this.$set(msg, 'format', this.objMsgType(msg.sect));
           }
@@ -184,7 +184,7 @@ Vue.component('vue-modal', {
         // 現在のレコード情報を格納
         records.push(event.record);
       }
-      console.log('records', records);
+      console.log('records', records.length + '件');
       console.groupEnd('get_targets()');
       return records;
     },
@@ -269,11 +269,18 @@ Vue.component('vue-modal', {
       if (Object.keys(log_record_params).length) {
         // レコード作成
         return await client.record.addRecord({
-          app: config.sync_fileLogAppId,
+          app   : config.sync_fileLogAppId,
           record: log_record_params,
+        }).then(resp => {
+          return resp;
+        }).catch(err => {
+          console.log(err);
+          // レコード登録エラー -> エラーメッセージ
+          this.$message({
+            type: 'error',
+            message: '配信ファイルログアプリへのレコードを作成できませんでした。'
+          });
         })
-        console.log(addRecord);
-        fileLog_recId = addRecord.id;
       }
     },
 
@@ -303,19 +310,20 @@ Vue.component('vue-modal', {
       return messages;
     },
 
-    create_targetsForLineAPI() {
-      const targets = await this.get_targets();
+    async create_targetsForLineAPI(config, targetRecords) {
+      console.log(targetRecords)
       const lineIds = [];
 
       // 対象者あり
-      if (targets && targets.length) {
-        targets.forEach(tg => {
+      if (targetRecords && targetRecords.length) {
+        targetRecords.forEach(tg => {
           if(config.sync_thisApp.lineId) {
             const lineId = tg[config.sync_thisApp.lineId].value;
             if(lineId) lineIds.push(lineId);
           }
         })
       }
+      return lineIds;
     },
 
     async send_lineMessage_change_richmenu(lineId, messages) {
@@ -359,7 +367,7 @@ Vue.component('vue-modal', {
      * @param {String} params.messageId     - メッセージID(このプログラムで生成するユニークの値)
      * @param {String} params.fileLog_recId - ファイルアップロード時のファイルログレコードID
      ****************************************************************************************************** */
-    async create_deliveryLog_recordObject(params) {
+    async create_recordObject_for_deliveryLog(params) {
       const event           = this.kintoneEvent;
       const config          = this.config;
       const thisApp         = config.sync_thisApp;
@@ -367,12 +375,12 @@ Vue.component('vue-modal', {
       const msg0            = this.messages[0];
 
       // 返信付メッセージのボタンアクションuriを格納
-      if (messages.length == 1 && msg0.reply) {
-        messages[0].template.actions[0].uri = `https://liff.line.me/${config.sync_liff.reply}?dest=0&msgid=${params.messageId}`;
+      if (params.messages.length == 1 && msg0.reply) {
+        params.messages[0].template.actions[0].uri = `https://liff.line.me/${config.sync_liff.reply}?dest=0&msgid=${params.messageId}`;
       }
 
       // ① 対象者へメッセージ送信
-      const message_success = await send_lineMessage_change_richmenu(params.target[thisApp.lineId].value, params.messages);
+      const message_success = await this.send_lineMessage_change_richmenu(params.target[thisApp.lineId].value, params.messages);
 
       // ② 送受信管理へ追加するレコードオブジェクトを生成
       const rec_prm = {
@@ -382,7 +390,7 @@ Vue.component('vue-modal', {
         'メッセージID'  : { value: params.messageId },
         '添付有無'      : { value: this.messages.find(v => ['IMAGE', 'FILE'].includes(v.sect)) ? 'あり' : 'なし' },
         '返信受付'      : { value: msg0.reply ? 'あり' : 'なし' },
-        '配信ファイルレコード番号': { value: params.fileLog_recId },
+        '配信ファイルレコード番号': { value: params.fileLog_recId || '' },
       };
 
 
@@ -470,7 +478,9 @@ Vue.component('vue-modal', {
       /** ***************************************************
        * 送信対象者配列作成
        *************************************************** */
-      const lineIds = this.create_targetsForLineAPI();
+      const targets = await this.get_targets();
+      const lineIds = await this.create_targetsForLineAPI(config, targets);
+      console.log(lineIds)
       // 対象者なし -> エラーメッセージ & 処理終了
       if(!lineIds.length) {
         this.$message({
@@ -496,15 +506,10 @@ Vue.component('vue-modal', {
          *************************************************** */
         let fileLog_recId = '';
         if (config.sync_fileLogAppId) {
-          const fileLogRecord = await create_fileLogRecord();
+          const fileLogRecord = await this.create_fileLogRecord();
+          console.log(fileLogRecord)
           if(fileLogRecord) {
             fileLog_recId = fileLogRecord.id;
-          } else {
-            // レコード登録エラー -> エラーメッセージ
-            this.$message({
-              type: 'error',
-              message: '配信ファイルログアプリへのレコードを作成できませんでした。'
-            });
           }
         }
 
@@ -528,7 +533,7 @@ Vue.component('vue-modal', {
              ******************************** */
             console.log('messages', messages);
 
-            const rec_prm = await create_deliveryLog_recordObject({
+            const rec_prm = await this.create_recordObject_for_deliveryLog({
               target       : tg,
               messages     : messages,
               messageId    : messageId,
@@ -544,7 +549,7 @@ Vue.component('vue-modal', {
         // ----------------------------
         // 一括追加
         // ----------------------------
-        const addRecords = await create_deliveryLog(log_record_params);
+        const addRecords = await this.create_deliveryLog(log_record_params);
         // レコード登録エラー -> エラーメッセージ & 処理終了
         if(!addRecords.length) {
           this.$message({
@@ -895,7 +900,10 @@ Vue.component('vue-modal', {
 
     </el-card>
 
-    <div class="mt-3 d-flex justify-content-end">
+    <div
+      v-if="config.msg_max >= 2"
+      class="mt-3 d-flex justify-content-end"
+    >
       <el-button
         type="primary"
         :disabled="messages.length < config.msg_max ? false : true"
@@ -905,13 +913,17 @@ Vue.component('vue-modal', {
         メッセージを追加
       </el-button>
     </div>
-    <span slot="footer" class="dialog-footer">
+
+    <div
+      slot="footer"
+      class="divided dialog-footer d-flex justify-content-end"
+    >
       <el-button @click="$emit('change', false)">キャンセル</el-button>
       <el-button
         type="primary"
         @click="send_lineMessage"
       >送信</el-button>
-    </span>
+    </div>
   </el-dialog>
   `
 })
