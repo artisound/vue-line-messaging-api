@@ -71,12 +71,21 @@ Vue.component('vue-modal', {
       return;
     },
 
+    /** ******************************************************************************************************
+     * 数値のみ格納された配列から最大値または最小値を出力
+     * @param {Array} array       - 数値のみ格納された配列
+     * @param {String} max_or_min - 取得したい値 ('max' | 'min')
+     *                            - default: 'max'
+     ****************************************************************************************************** */
     get_max_min_byArray(array, max_or_min = 'max') {
       const aryMax = (a, b) => { return Math.max(Number(a), Number(b)); };
       const aryMin = (a, b) => { return Math.min(Number(a), Number(b)); };
       return (max_or_min == 'max') ? array.reduce(aryMax) : array.reduce(aryMin);
     },
 
+    /** ******************************************************************************************************
+     * テキストメッセージと返信ボタン付きメッセージを切り替える
+     ****************************************************************************************************** */
     change_replyToDisable() {
       if(this.messages.length > 1) {
         this.messages.forEach(msg => {
@@ -231,6 +240,9 @@ Vue.component('vue-modal', {
       return uploaded_file;
     },
 
+    /** ******************************************************************************************************
+     * 配信ファイルログのレコード登録用オブジェクトを生成
+     ****************************************************************************************************** */
     async create_fileLogRecord() {
       const client      = new KintoneRestAPIClient(); // kintone Rest API Client
       const timestamp   = date.getTime();     // 現在時刻タイムスタンプ
@@ -285,6 +297,9 @@ Vue.component('vue-modal', {
       }
     },
 
+    /** ******************************************************************************************************
+     * LINE Messaging API用にメッセージフォーマットを整形
+     ****************************************************************************************************** */
     create_messagesForLineAPI() {
       const messages = [];
       this.messages.forEach(msg => {
@@ -311,6 +326,11 @@ Vue.component('vue-modal', {
       return messages;
     },
 
+    /** ******************************************************************************************************
+     * 対象のレコードからLINEユーザーIDのみの配列を出力
+     * @param {Object} config - プラグイン設定情報
+     * @param {Array} targetRecords - 対象の顧客レコード配列
+     ****************************************************************************************************** */
     async create_targetsForLineAPI(config, targetRecords) {
       console.log(targetRecords)
       const lineIds = [];
@@ -327,7 +347,14 @@ Vue.component('vue-modal', {
       return lineIds;
     },
 
-    async send_lineMessage_change_richmenu(lineId, messages) {
+    /** ******************************************************************************************************
+     * LINEメッセージ送信 & リッチメニュー切り替え (受信Boxメッセージ格納時)
+     * @param {String} lineId   - リッチメニューを切り替える対象のLINEユーザーID
+     * @param {Array} messages  - LINE Messaging API用に整形されたメッセージ配列
+     * @param {Boolean} change  - リッチメニューを切り替えるか否か
+     *                          - default: true
+     ****************************************************************************************************** */
+    async send_lineMessage_change_richmenu(lineId, messages, change = true) {
       const config    = this.config;
       const exec_url  = 'https://timeconcier.jp/forline/tccom/v2/tcLibLINE/';
 
@@ -344,7 +371,7 @@ Vue.component('vue-modal', {
            * - RICHTEXT | INFORMATION
            ****************************** */
           const inboxMessage = this.messages.find(v => ['RICHTEXT', 'INFORMATION'].includes(v.sect));
-          if(inboxMessage) {
+          if(inboxMessage && change) {
             const change_richmenu = await axios.post(exec_url, {
               accessToken: config.sync_line.channel_token,
               action: 'linkRichmenuToUser',
