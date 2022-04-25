@@ -10,6 +10,7 @@ Vue.component('vue-modal', {
       radio: '今すぐ配信',
       contentsRadio: '',
       messages: [],
+      embed   : [],
       stickers: stickers(),
       sticker_tab: Object.keys( stickers() )[0],
       objContents: [
@@ -19,7 +20,7 @@ Vue.component('vue-modal', {
         { value: 'FILE',        label: 'ファイル',  icon: 'fa-regular fa-file' },
         { value: 'RICHTEXT',    label: 'リッチ',    icon: 'fa-solid fa-inbox' },
         { value: 'INFORMATION', label: 'お知らせ',  icon: 'fa-solid fa-circle-info' },
-      ]
+      ],
     }
   },
   watch: {
@@ -120,24 +121,24 @@ Vue.component('vue-modal', {
           obj['format'] = { type: 'image', originalContentUrl: '', previewImageUrl: '' };
           obj['dialog'] = false;
           obj['path']   = '';
-          obj['blob'] = '';
+          obj['blob']   = '';
           obj['origin_name']  = '';
           break;
         case 'FILE':
           obj['format'] = {
             type: 'template',
-            altText: '',    // ファイル名
+            altText : '',    // ファイル名
             template: {
-              type: 'buttons',
-              title: '',    // ファイル名
-              text: '※ファイルURLは1週間有効です。\n(' + dayjs().add(1, 'week').format('YYYY/MM/DD') + ' 迄)',
+              type   : 'buttons',
+              title  : '',    // ファイル名
+              text   : '※ファイルURLは1週間有効です。\n(' + dayjs().add(1, 'week').format('YYYY/MM/DD') + ' 迄)',
               actions: [{ 'label': 'ダウンロード', 'type': 'uri', 'uri': '' }]
             }
           };
           obj['url']    = '';
           obj['name']   = '';
           obj['path']   = '';
-          obj['blob'] = '';
+          obj['blob']   = '';
           obj['origin_name']  = '';
           break;
         case 'RICHTEXT':
@@ -466,7 +467,7 @@ Vue.component('vue-modal', {
       /** ***************************************************
        * メッセージ配列作成
        *************************************************** */
-      const messages = this.create_messagesForLineAPI();
+      let messages = this.create_messagesForLineAPI();
       // メッセージなし -> エラーメッセージ & 処理終了
       if(!messages.length) {
         this.$message({
@@ -523,9 +524,22 @@ Vue.component('vue-modal', {
             /** ********************************
              * 埋め込み文字の処理
              ******************************** */
-            //
-            //
-            //
+            if(embed.length) {
+              for (let n = 0; n < messages.length; n++) {
+                const msg = messages[n];
+                msg = Object.create(msg);   // 参照渡し防止
+
+                let text;
+                switch(msg.type) {
+                  case 'text':      // テキストメッセージ
+                    text = msg.format.text;
+                    break;
+                  case 'template':  // ボタンテンプレートメッセージ
+                    text = msg.format.template.actions[0].text;
+                    break;
+                }
+              }
+            }
             /** ***************************** */
 
 
