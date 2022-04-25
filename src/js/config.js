@@ -82,7 +82,6 @@
         ],
         msg_options: [
           { label: 'テンプレート',  property: 'template' },
-          { label: '絵文字',        property: 'emoji' },
           { label: '埋め込み文字',  property: 'embed_char' }
         ],
       }
