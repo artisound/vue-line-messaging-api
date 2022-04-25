@@ -62,8 +62,9 @@
             richmenuId_badged: '',  // 受信BOXリッチメニューID(バッジ有り)
           },
           sync_liff: {
-            init: '',
-            reply: '',
+            init: '',   // 初回認証用LIFF ID
+            reply: '',  // 返信用LIFF ID
+            inbox: '',  // 受信Box用 LIFF ID
           }
         },
         views : [],
