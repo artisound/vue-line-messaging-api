@@ -47,6 +47,7 @@ Vue.component('vue-modal', {
     }
   },
   mounted: async function() {
+    console.group('画面読込');
     this.targets = await this.get_targets();
     this.config['file_upload_accept'] = [
       { label:'Office PowerPoint',  value:'.ppt,.pptx' },
@@ -65,8 +66,9 @@ Vue.component('vue-modal', {
       this.messages.push(this.objMsgType(primary_sect));
     }
 
-    const ts = date.getTime();
-    console.log(dayjs(ts).format('YYYY-MM-DD HH:mm:ss'));
+    // const ts = date.getTime();
+    // console.log(dayjs(ts).format('YYYY-MM-DD HH:mm:ss'));
+    console.groupEnd('画面読込');
   },
   methods: {
     handleClose() {
@@ -336,13 +338,13 @@ Vue.component('vue-modal', {
      * @param {Object} config - プラグイン設定情報
      * @param {Array} targetRecords - 対象の顧客レコード配列
      ****************************************************************************************************** */
-    async create_targetsForLineAPI(config, targetRecords) {
-      console.log(targetRecords)
+    async create_targetsForLineAPI(config) {
+      console.log(this.targets)
       const lineIds = [];
 
       // 対象者あり
-      if (targetRecords && targetRecords.length) {
-        targetRecords.forEach(tg => {
+      if (this.targets.length) {
+        this.targets.forEach(tg => {
           if(config.sync_thisApp.lineId) {
             const lineId = tg[config.sync_thisApp.lineId].value;
             if(lineId) lineIds.push(lineId);
@@ -478,7 +480,7 @@ Vue.component('vue-modal', {
      * LINE メッセージ送信
      ****************************************************************************************************** */
     async send_lineMessage() {
-      console.clear();
+      // console.clear();
       console.group('send_lineMessage()');
       this.loading   = this.$loading({
         lock: true,
