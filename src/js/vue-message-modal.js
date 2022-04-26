@@ -10,6 +10,7 @@ Vue.component('vue-modal', {
       loading: {},
       radio: '今すぐ配信',
       contentsRadio: '',
+      targets : [],
       messages: [],
       embed   : [],
       stickers: stickers(),
@@ -46,7 +47,7 @@ Vue.component('vue-modal', {
     }
   },
   mounted: async function() {
-    const client = new KintoneRestAPIClient(); // kintone Rest API Client
+    this.targets = await this.get_targets();
     this.config['file_upload_accept'] = [
       { label:'Office PowerPoint',  value:'.ppt,.pptx' },
       { label:'Office Word',        value:'.doc,.docx' },
@@ -408,7 +409,7 @@ Vue.component('vue-modal', {
 
       // 返信付メッセージのボタンアクションuriを格納
       if (params.messages.length == 1 && msg0.reply) {
-        params.messages[0].template.actions[0].uri = `https://liff.line.me/${config.sync_liff.reply}?dest=0&msgid=${params.messageId}`;
+        params.messages[0].template.actions[0].uri = `https://liff.line.me/${config.sync_liff.reply}?dest=0&msgid=${params.messageId}&openExternalBrowser=1`;
       }
 
       // ① 対象者へメッセージ送信
@@ -427,8 +428,8 @@ Vue.component('vue-modal', {
 
 
       // 顧客レコード番号
-      // if (thisApp.recId) rec_prm[deliveryLogApp.customer_recId] = { value: params.target[thisApp.recId].value };
-      if (thisApp.recId) rec_prm[deliveryLogApp.customer_recId] = { value: 12180 };
+      if (thisApp.recId) rec_prm[deliveryLogApp.customer_recId] = { value: params.target[thisApp.recId].value };
+      // if (thisApp.recId) rec_prm[deliveryLogApp.customer_recId] = { value: 12180 };
       // 顧客LINEユーザーID
       if (thisApp.lineId) rec_prm[deliveryLogApp.customer_lineId] = { value: params.target[thisApp.lineId].value };
       // 担当者レコード番号
@@ -518,8 +519,7 @@ Vue.component('vue-modal', {
       /** ***************************************************
        * 送信対象者配列作成
        *************************************************** */
-      const targets = await this.get_targets();
-      const lineIds = await this.create_targetsForLineAPI(config, targets);
+      const lineIds = await this.create_targetsForLineAPI(config);
       console.log(lineIds)
       // 対象者なし -> エラーメッセージ & 処理終了
       if(!lineIds.length) {
@@ -557,7 +557,7 @@ Vue.component('vue-modal', {
 
         // 送受信管理のレコードオブジェクトを作成
         const log_record_params = [];
-        for (let tg of targets) {
+        for (let tg of this.targets) {
           const lineId = tg[thisApp.lineId].value;
           if (lineId && messages.length) {
             /** ********************************
@@ -605,7 +605,7 @@ Vue.component('vue-modal', {
         // ----------------------------
         const addRecords = await this.create_deliveryLog(log_record_params);
         // レコード登録エラー -> エラーメッセージ & 処理終了
-        if(!addRecords.length) {
+        if(!addRecords && !addRecords.length) {
           this.loading.close();
           this.$message({
             type: 'error',
