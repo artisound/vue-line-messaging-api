@@ -8,6 +8,7 @@ Vue.component('vue-modal', {
   data() {
     return {
       loading: {},
+      hostname: window.location.hostname,
       radio: '今すぐ配信',
       contentsRadio: '',
       targets : [],
@@ -60,11 +61,15 @@ Vue.component('vue-modal', {
       { label:'動画',               value:'video/*' },
       { label:'ZIP',                value:'application/zip' },
     ];
+
+    console.log(this.kintoneEvent);
     const config = this.config;
     if(config.msg_sect.length) {
       const primary_sect = config.msg_sect[0];
       this.messages.push(this.objMsgType(primary_sect));
     }
+
+    console.log(this.targets)
 
     // const ts = date.getTime();
     // console.log(dayjs(ts).format('YYYY-MM-DD HH:mm:ss'));
@@ -492,14 +497,26 @@ Vue.component('vue-modal', {
       const timestamp = date.getTime();     // 現在時刻タイムスタンプ
       const config    = this.config;        // 設定情報
       const event     = this.kintoneEvent;  // kintoneイベント情報
-      const confirm = await this.$confirm(
-        '該当のお客様にメッセージを送信します。<br>送信後は取り消すことができません。<br>よろしいですか？', // メッセージボディ
+
+      let confirmHTML = `<div class="d-flex justify-content-between">`;
+      confirmHTML += `<span>以下のお客様にメッセージを送信します。</span><span>(${this.targets.length} 件)</span>`;
+      confirmHTML += `</div>`;
+      confirmHTML += `<ul style="max-height:200px;overflow-y:auto;">`;
+      for (let target of this.targets) {
+        confirmHTML += `<li>`;
+        confirmHTML += `<a href="https://${this.hostname}/k/${this.kintoneEvent.appId}/show#record=${target.$id.value}" target="_blank">${target['顧客名'].value}</a> 様`;
+        confirmHTML += `</li>`;
+      }
+      confirmHTML += `</ul>`;
+      confirmHTML += `送信後は取り消すことができません。よろしいですか？`;
+      const confirm   = await this.$confirm(
+        confirmHTML, // メッセージボディ
         '確認', // ヘッダータイトル
         {
           confirmButtonText: '送信',
           cancelButtonText: 'キャンセル',
           dangerouslyUseHTMLString: true,
-          type: 'warning'
+          // type: 'warning'
         }).then(_ => { return true; }).catch(_ => {
           this.loading.close();
           return false;
@@ -644,7 +661,7 @@ Vue.component('vue-modal', {
   },
   template: `
   <el-dialog
-    width="70%"
+    width="800px"
     :visible.sync="toggleDialog"
     :show-close="false"
     :before-close="handleClose"
