@@ -500,7 +500,10 @@ Vue.component('vue-modal', {
           cancelButtonText: 'キャンセル',
           dangerouslyUseHTMLString: true,
           type: 'warning'
-        }).then(_ => { return true; }).catch(_ => { return false; });
+        }).then(_ => { return true; }).catch(_ => {
+          this.loading.close();
+          return false;
+        });
       // キャンセルボタン押下
       if(!confirm) return;
 
