@@ -501,7 +501,7 @@ Vue.component('vue-modal', {
       let confirmHTML = `<div class="d-flex justify-content-between">`;
       confirmHTML += `<span>以下のお客様にメッセージを送信します。</span><span>(${this.targets.length} 件)</span>`;
       confirmHTML += `</div>`;
-      confirmHTML += `<ul style="max-height:200px;overflow-y:auto;">`;
+      confirmHTML += `<ul style="max-height:150px;overflow-y:auto;">`;
       for (let target of this.targets) {
         confirmHTML += `<li>`;
         confirmHTML += `<a href="https://${this.hostname}/k/${this.kintoneEvent.appId}/show#record=${target.$id.value}" target="_blank">${target['顧客名'].value}</a> 様`;
@@ -737,7 +737,6 @@ Vue.component('vue-modal', {
             type="textarea"
             v-model="msg.format.template.text"
             placeholder="テキストを入力"
-            :maxlength="160"
             :rows="10"
           ></el-input>
           <el-input
@@ -762,12 +761,41 @@ Vue.component('vue-modal', {
                   if(msg.reply) {
                     const liffId = config.syncliff ? config.sync_liff.reply : '';
                     format = {
-                      type: 'template',
-                      altText: 'メッセージが届きました。',
-                      template: {
-                        type: 'buttons',
-                        text: msg.format.text,
-                        actions: [{ type: 'uri', label: '返信', uri: 'https://liff.line.me/'+liffId }]
+                        type: 'flex',
+                        altText: 'メッセージが届きました。',
+                        contents: {
+                          type: 'bubble',
+                          body: {
+                            type: 'box',
+                            layout: 'vertical',
+                            contents: [
+                              {
+                                type: 'text',
+                                text: msg.format.text,
+                                size: 'md',
+                                align: 'start',
+                                wrap: true,
+                                contents: []
+                              }
+                            ]
+                          },
+                          footer: {
+                            type: 'box',
+                            layout: 'horizontal',
+                            contents: [
+                              {
+                                type: 'button',
+                                action: {
+                                type: 'uri',
+                                label: '返信',
+                                uri: 'https://liff.line.me/'+liffId
+                                },
+                                height: 'sm',
+                                style: 'secondary'
+                              }
+                            ]
+                          }
+                        }
                       }
                     };
                   } else {
