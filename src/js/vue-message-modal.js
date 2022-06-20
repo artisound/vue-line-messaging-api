@@ -318,7 +318,7 @@ Vue.component('vue-modal', {
         switch(msg.sect) {
           case 'TEXT':
             if(msg.reply) {
-              if(msg.format.template.text) messages.push(msg.format)
+              if(msg.format.contents.body.contents[0].text) messages.push(msg.format)
             } else {
               if(msg.format.text) messages.push(msg.format)
             }
@@ -416,8 +416,10 @@ Vue.component('vue-modal', {
 
       // 返信付メッセージのボタンアクションuriを格納
       if (params.messages.length == 1 && msg0.reply) {
-        params.messages[0].template.actions[0].uri = `https://liff.line.me/${config.sync_liff.reply}?dest=0&msgid=${params.messageId}&openExternalBrowser=1`;
+        params.messages[0].contents.footer.contents[0].action.uri = `https://liff.line.me/${config.sync_liff.reply}?dest=0&msgid=${params.messageId}&openExternalBrowser=1`;
       }
+
+      console.log(params.messages)
 
       // ① 対象者へメッセージ送信
       const message_success = await this.send_lineMessage_change_richmenu(params.target[thisApp.lineId].value, params.messages);
@@ -447,12 +449,23 @@ Vue.component('vue-modal', {
       // メッセージが1件のみの場合
       if (params.messages.length == 1) {
         if (msg0.sect == 'TEXT') {
-          rec_prm[deliveryLogApp.message_content] = { value: msg0.reply ? params.messages[0].template.text : params.messages[0].text };
+          rec_prm[deliveryLogApp.message_content] = { value: msg0.reply ? params.messages[0].contents.body.contents[0].text : params.messages[0].text };
         } else {
-          const sect_value = this.objContents.find(v => v.value == msg0.sect).value;
           const sect_label = this.objContents.find(v => v.value == msg0.sect).label;
           rec_prm[deliveryLogApp.message_content] = { value: '(' + sect_label + '配信)' };
         }
+      } else if (params.messages.length > 1) {
+        let message_content = '';
+        for (let msg of this.messages) {
+          if (message_content) message_content += '\n\n';
+          if (msg.sect == 'TEXT') {
+            message_content += msg.format.text
+          } else {
+            const sect_label = this.objContents.find(v => v.value == msg.sect).label;
+            message_content += '(' + sect_label + '配信)';
+          }
+        }
+        rec_prm[deliveryLogApp.message_content] = { value: message_content }
       }
 
       return rec_prm;
@@ -596,7 +609,7 @@ Vue.component('vue-modal', {
                     text = msg.format.text;
                     break;
                   case 'template':  // ボタンテンプレートメッセージ
-                    text = msg.format.template.actions[0].text;
+                    text = msg.format.contents.body.contents[0].text;
                     break;
                 }
               }
@@ -735,7 +748,7 @@ Vue.component('vue-modal', {
             v-if="msg.reply"
             show-word-limit
             type="textarea"
-            v-model="msg.format.template.text"
+            v-model="msg.format.contents.body.contents[0].text"
             placeholder="テキストを入力"
             :rows="10"
           ></el-input>
@@ -761,45 +774,44 @@ Vue.component('vue-modal', {
                   if(msg.reply) {
                     const liffId = config.syncliff ? config.sync_liff.reply : '';
                     format = {
-                        type: 'flex',
-                        altText: 'メッセージが届きました。',
-                        contents: {
-                          type: 'bubble',
-                          body: {
-                            type: 'box',
-                            layout: 'vertical',
-                            contents: [
-                              {
-                                type: 'text',
-                                text: msg.format.text,
-                                size: 'md',
-                                align: 'start',
-                                wrap: true,
-                                contents: []
-                              }
-                            ]
-                          },
-                          footer: {
-                            type: 'box',
-                            layout: 'horizontal',
-                            contents: [
-                              {
-                                type: 'button',
-                                action: {
-                                type: 'uri',
-                                label: '返信',
-                                uri: 'https://liff.line.me/'+liffId
-                                },
-                                height: 'sm',
-                                style: 'secondary'
-                              }
-                            ]
-                          }
+                      type: 'flex',
+                      altText: 'メッセージが届きました。',
+                      contents: {
+                        type: 'bubble',
+                        body: {
+                          type: 'box',
+                          layout: 'vertical',
+                          contents: [
+                            {
+                              type: 'text',
+                              text: msg.format.text,
+                              size: 'md',
+                              align: 'start',
+                              wrap: true,
+                              contents: []
+                            }
+                          ]
+                        },
+                        footer: {
+                          type: 'box',
+                          layout: 'horizontal',
+                          contents: [
+                            {
+                              type: 'button',
+                              action: {
+                              type: 'uri',
+                              label: '返信',
+                              uri: 'https://liff.line.me/'+liffId
+                              },
+                              height: 'sm',
+                              style: 'secondary'
+                            }
+                          ]
                         }
                       }
                     };
                   } else {
-                    format = { type: 'text', text: msg.format.template.text };
+                    format = { type: 'text', text: msg.format.contents.body.contents[0].text };
                   }
                   $set(messages[i], 'format', format);
                 }"
@@ -1025,13 +1037,14 @@ Vue.component('vue-modal', {
       >
         <el-button
           type="primary"
-          :disabled="messages.length < config.msg_max ? false : true"
+          :disabled="messages.length < config.msg_max || !messages[0].reply ? false : true"
           @click="messages.push( objMsgType('TEXT') );change_replyToDisable();"
         >
           <i class="fa-solid fa-plus me-1"></i>
           メッセージを追加
         </el-button>
       </div>
+
     </div>
 
     <div
