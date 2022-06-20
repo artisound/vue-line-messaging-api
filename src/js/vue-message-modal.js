@@ -1037,7 +1037,7 @@ Vue.component('vue-modal', {
       >
         <el-button
           type="primary"
-          :disabled="messages.length < config.msg_max || !messages[0].reply ? false : true"
+          :disabled="messages.length < config.msg_max && !messages[0].reply ? false : true"
           @click="messages.push( objMsgType('TEXT') );change_replyToDisable();"
         >
           <i class="fa-solid fa-plus me-1"></i>
