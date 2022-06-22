@@ -750,6 +750,7 @@ Vue.component('vue-modal', {
             type="textarea"
             v-model="msg.format.contents.body.contents[0].text"
             placeholder="テキストを入力"
+            :maxlength="500"
             :rows="10"
           ></el-input>
           <el-input
